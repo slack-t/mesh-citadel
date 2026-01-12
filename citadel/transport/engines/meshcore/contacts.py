@@ -114,7 +114,7 @@ class ContactManager:
                 log.info("Disabled auto-add of contacts on node")
 
         if self.config.get("update_contacts", False):
-            self.synchronize()
+            await self.synchronize()
 
         log.info("Initializing contact caches")
         await self._load_db_cache()
@@ -157,6 +157,10 @@ class ContactManager:
     async def add_contact(self, contact: ContactInfo):
         """Add the specified contact to the database and the node's contact
         list."""
+        if not contact:
+            log.error("Empty contact passed to add_contact(), skipping")
+            return
+
         node_contacts = await self._count_node_contacts()
 
         try:
@@ -213,7 +217,6 @@ class ContactManager:
                 return
 
             node_id = public_key[:16]
-
             if event.type == EventType.NEW_CONTACT:
                 contact = self._advert_to_contactinfo(advert_data)
             else:
@@ -241,23 +244,39 @@ class ContactManager:
         """Convert the data from an advert into a ContactInfo object. Takes
         either a JSON string or a dict as advert."""
         if isinstance(advert, str):
+            str_advert = advert
             try:
-                str_advert = advert
-                advert = json.loads(advert)
+                dict_advert = json.loads(str_advert)
             except json.JSONDecodeError as err:
                 log.exception(f"Unable to convert {str_advert} to dict: {err}")
-                return
+                return None
+        elif isinstance(advert, dict):
+            dict_advert = advert
+            try:
+                str_advert = json.dumps(dict_advert)
+            except json.JSONDecodeError as err:
+                log.exception(f"Unable to convert {dict_advert} to str: {err}")
+                return None
         else:
-            str_advert = json.dumps(advert)
+            log.error(f"Unable to process advert; format unknown: {advert}")
+            return None
+
+        if not isinstance(dict_advert, dict):
+            log.error(f"Somehow ended up with non-dict advert: {advert}")
+            return None
+
+        if not self._validate_public_key(dict_advert['public_key']):
+            log.error(f"Unable to convert advert to ContactInfo, bad public_key value: {advert}")
+            return None
 
         try:
             contact = ContactInfo(
-                node_id=advert['public_key'][:16],
-                public_key=advert['public_key'],
-                node_type=int(advert['type']),
-                name=advert['adv_name'],
-                latitude=float(advert.get("adv_lat", 0.0)),
-                longitude=float(advert.get("adv_lon", 0.0)),
+                node_id=dict_advert['public_key'][:16],
+                public_key=dict_advert['public_key'],
+                node_type=int(dict_advert['type']),
+                name=dict_advert['adv_name'],
+                latitude=float(dict_advert.get("adv_lat", 0.0)),
+                longitude=float(dict_advert.get("adv_lon", 0.0)),
                 raw_advert_data=str_advert,
             )
         except Exception as err:
@@ -282,6 +301,20 @@ class ContactManager:
         advert['lastmod'] = advert['last_advert']
         return advert
 
+    def _validate_public_key(self, key) -> bool:
+        """Ensure the public_key value is sensible"""
+        # for now we're only working with string keys, not bytes values
+        if not isinstance(key, str):
+            return False
+        if len(key) < 64:
+            return False
+        # check that it's actually a hex value
+        try:
+            int(key, 16)
+        except ValueError:
+            return False
+        return True
+
     def _is_companion(self, contact) -> bool:
         return contact.node_type == 1
 
@@ -305,7 +338,7 @@ class ContactManager:
         query = """
             SELECT node_id, raw_advert_data
             FROM mc_chat_contacts
-            ORDERED BY last_seen DESC
+            ORDER BY last_seen DESC
         """
         data = await self.db.execute(query)
         count = 0
@@ -373,15 +406,25 @@ class ContactManager:
         """Blindly add the given contact to the node, and the node
         cache.  This function *does not* handle making space for a new
         contact."""
-        if contact.raw_advert_data:
-            try:
-                advert = json.loads(contact.raw_advert_data)
-            except (json.JSONDecodeError, TypeError):
+        advert = {}
+        # try to construct an advert dictionary from all available sources
+        if contact:
+            if contact.raw_advert_data:
+                try:
+                    advert = json.loads(contact.raw_advert_data)
+                except (json.JSONDecodeError, TypeError):
+                    advert = self._contactinfo_to_advert(contact)
+            else:
                 advert = self._contactinfo_to_advert(contact)
-            result = await self.meshcore.commands.add_contact(advert)
         else:
-            log.error(f"Unable to add {contact.name} to node contact list: missing advert string")
+            log.error(f"No contact given for _add_contact_to_node, skipping")
             return False
+
+        if not advert:
+            log.error(f"Unable to add {contact.name} to node contact list: missing advert data")
+            return False
+
+        result = await self.meshcore.commands.add_contact(advert)
         if result.type == EventType.ERROR:
             log.error(f"Unable to add {contact.name} to node contact list: {result.payload}")
             return False
