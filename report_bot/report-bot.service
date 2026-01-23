@@ -1,0 +1,27 @@
+[Unit]
+Description=MeshCore Report Bot
+After=network.target
+
+[Service]
+Type=simple
+User=meshcore
+Group=meshcore
+WorkingDirectory=/path/to/report_bot
+ExecStart=/usr/bin/python3 /path/to/report_bot/report_bot.py
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=report-bot
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/path/to/report_bot
+
+[Install]
+WantedBy=multi-user.target

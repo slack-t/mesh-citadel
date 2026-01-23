@@ -1,0 +1,5 @@
+aiohttp==3.9.5
+meshcore-cli==1.1.35
+PyYAML==6.0.2
+pyserial==3.5
+pyserial-asyncio==0.6

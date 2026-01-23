@@ -1,0 +1,22 @@
+meshcore:
+  serial_port: "/dev/ttyUSB0"
+  baud_rate: 115200
+  frequency: 910.525
+  bandwidth: 62.5
+  spreading_factor: 7
+  coding_rate: 5
+  tx_power: 22
+  name: "AlertBot"
+  max_packet_size: 140
+  inter_packet_delay: 0.5
+
+channel:
+  name: "#alerts"        # Hashtag channel - key auto-generated from name
+  index: 0               # Channel index (0-7)
+
+polling:
+  url: "https://your-shared-host.com/alerts/latest.json"
+  interval: 60           # Poll every 60 seconds
+  headers:               # Optional authentication
+    # Authorization: "Bearer your-token"
+    # X-API-Key: "your-api-key"
