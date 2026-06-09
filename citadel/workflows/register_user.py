@@ -170,7 +170,7 @@ class RegisterUserWorkflow(Workflow):
                     )
                     return ToUser(
                         session_id=context.session_id,
-                        text=f"{step_num}: {terms}\nBist du cool mit den Regeln?",
+                        text=f"{step_num}: {terms}\nBist du cool mit den Regeln? (ja/nein)",
                         hints={"type": "choice", "options": [
                             "ja", "nein"], "workflow": self.kind, "step": 4}
                     )
@@ -184,7 +184,7 @@ class RegisterUserWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text=f"{step_num}: Erzähl mal was über dich.",
+                text=f"{step_num}: Was ist dein Motto?",
                 hints={"type": "text", "workflow": self.kind, "step": 5}
             )
 
@@ -239,7 +239,7 @@ class RegisterUserWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text=f"{step_num}: Erzähl was über dich (Wer bist du, was machst du hier?):",
+                text=f"{step_num}: Was ist dein Motto?",
                 hints={"type": "text", "workflow": self.kind, "step": 5}
             )
 

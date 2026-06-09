@@ -110,8 +110,8 @@ class GoNextUnreadCommand(BaseCommand):
     name = "go_next_unread"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Goto next unread room"
-    help_text = "Go to the next room with unread messages. This skips over rooms you've already read completely."
+    short_text = "Nächster Raum mit neuen Nachrichten"
+    help_text = "Gehe zum nächsten Raum mit ungelesenen Nachrichten. Überspringt Räume, die du schon kennst."
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -154,8 +154,8 @@ class EnterMessageCommand(BaseCommand):
     name = "enter_message"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Enter message"
-    help_text = "Compose and post a message to the current room"
+    short_text = "Nachricht schreiben"
+    help_text = "Verfass eine neue Nachricht in diesem Raum."
 
     def validate(self, context=None):
         super().validate(context)
@@ -195,8 +195,8 @@ class ReverseReadCommand(BaseCommand):
     name = "reverse_read"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Reverse read messages"
-    help_text = "Read messages in the current room, starting with the most recent and moving backwards."
+    short_text = "Nachrichten rückwärts lesen"
+    help_text = "Lies Nachrichten von neu nach alt."
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -215,8 +215,8 @@ class ForwardReadCommand(BaseCommand):
     name = "forward_read"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Forward read messages"
-    help_text = "Read messages in the current room, starting with the oldest and moving forward."
+    short_text = "Nachrichten vorwärts lesen"
+    help_text = "Lies Nachrichten von alt nach neu."
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -235,8 +235,8 @@ class ReadNewMessagesCommand(BaseCommand):
     name = "read_new_messages"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Read new messages"
-    help_text = "Read new messages since last visit. Starts with the oldest mesasage you haven't read yet in this room."
+    short_text = "Neue Nachrichten lesen"
+    help_text = "Lies nur Nachrichten, die du noch nicht gesehen hast."
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -253,8 +253,8 @@ class KnownRoomsCommand(BaseCommand):
     name = "known_rooms"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Known rooms"
-    help_text = "List all rooms known to you."
+    short_text = "Bekannte Räume"
+    help_text = "Zeigt alle Räume, die du kennst."
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -301,8 +301,8 @@ class IgnoreRoomCommand(BaseCommand):
     name = "ignore_room"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Ignore room"
-    help_text = "Ignore or unignore the current room"
+    short_text = "Raum ignorieren"
+    help_text = "Ignoriere den aktuellen Raum oder hebe die Ignorierung auf."
 
 
 @register_command
@@ -311,8 +311,8 @@ class QuitCommand(BaseCommand):
     name = "quit"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Quit"
-    help_text = "Quit or log off"
+    short_text = "Abhauen (Quit)"
+    help_text = "Ausloggen und tschüss."
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -342,8 +342,8 @@ class StopCommand(BaseCommand):
     name = "stop"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Stop messages"
-    help_text = "Stop sending messages as soon as possible"
+    short_text = "Nachrichten stoppen"
+    help_text = "Hört auf, Nachrichten zu spammen."
 
     async def run(self, context):
         num = await context.session_mgr.clear_msg_queue(context.session_id)
@@ -363,8 +363,8 @@ class CancelCommand(BaseCommand):
     name = "cancel"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Cancel workflow"
-    help_text = "Cancel the current workflow and return to normal command mode"
+    short_text = "Aktion abbrechen"
+    help_text = "Bricht den aktuellen Workflow ab und geht zurück in den Normalmodus."
 
     async def run(self, context):
         from citadel.workflows import registry as workflow_registry
@@ -415,8 +415,8 @@ class ScanMessagesCommand(BaseCommand):
     name = "scan_messages"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
-    short_text = "Scan messages"
-    help_text = "Show message summaries in the current room."
+    short_text = "Nachrichten überfliegen"
+    help_text = "Zeigt eine Zusammenfassung der Nachrichten in diesem Raum."
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -434,8 +434,8 @@ class ChangeRoomCommand(BaseCommand):
     name = "change_room"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
-    short_text = "Change room"
-    help_text = "Change to a room by name or number. Specify the room name or ID after the command letter."
+    short_text = "Raum wechseln"
+    help_text = "Wechsle in einen anderen Raum. Gib den Namen oder die Nummer nach dem Kommando ein."
     # add an args attribute for any command that takes an argument
     args = ""
 
@@ -470,8 +470,8 @@ class HelpCommand(BaseCommand):
     name = "help"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Help"
-    help_text = "Display a help menu of available commands"
+    short_text = "Hilfe"
+    help_text = "Zeigt das Hilfemenü mit allen Kommandos."
 
     async def run(self, context):
         from citadel.commands.registry import registry
@@ -574,8 +574,8 @@ class MenuCommand(BaseCommand):
     name = "help"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Help"
-    help_text = "Display a help menu of available commands"
+    short_text = "Hilfe"
+    help_text = "Zeigt das Hilfemenü mit allen Kommandos."
 
     # Use the same implementation as HelpCommand
     run = HelpCommand.run
@@ -589,8 +589,8 @@ class MailCommand(BaseCommand):
     name = "mail"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
-    short_text = "Go to Mail"
-    help_text = "Go directly to the Mail room to send/receive private messages."
+    short_text = "Zur Post gehen"
+    help_text = "Geht direkt in den Mail-Raum für private Nachrichten."
 
     async def run(self, context):
 
@@ -622,8 +622,8 @@ class WhoCommand(BaseCommand):
     name = "who"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
-    short_text = "Who's online"
-    help_text = "List active users currently online."
+    short_text = "Wer ist online?"
+    help_text = "Zeigt wer gerade alles rumhängt."
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -705,8 +705,8 @@ class DeleteMessageCommand(BaseCommand):
     name = "delete_message"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Delete message"
-    help_text = "Delete a message ID specified after the command letter. Only Aides and Sysops can delete others' messages."
+    short_text = "Nachricht löschen"
+    help_text = "Löscht eine Nachricht mit bestimmter ID. Nur Aides und Sysops dürfen fremde Nachrichten löschen."
     args = ""
 
     async def run(self, context):
@@ -759,8 +759,8 @@ class BlockUserCommand(BaseCommand):
     name = "block_user"
     category = CommandCategory.UNUSUAL
     permission_level = PermissionLevel.USER
-    short_text = "(Un)Block user"
-    help_text = "Block or unblock another user. Specify username or display name after the command letter. Prevents you seeing their messages/mails (they can still see yours)."
+    short_text = "User (ent)sperren"
+    help_text = "Sperrt (oder entsperrt) einen anderen User. Du siehst dann keine Nachrichten mehr von dem."
 
 
 @register_command
@@ -769,8 +769,8 @@ class ValidateUsersCommand(BaseCommand):
     name = "validate_users"
     category = CommandCategory.AIDE
     permission_level = PermissionLevel.AIDE
-    short_text = "Validate users"
-    help_text = "Enter the user validation workflow to approve new users."
+    short_text = "User freigeben"
+    help_text = "Startet den Workflow um neue User zu validieren."
 
     async def run(self, context):
         # Check if there are any pending validations
@@ -825,8 +825,8 @@ class CreateRoomCommand(BaseCommand):
     name = "create_room"
     category = CommandCategory.UNUSUAL
     permission_level = PermissionLevel.USER
-    short_text = "Create room"
-    help_text = "Create a new room. Sends you into an interactive workflow to create the new room."
+    short_text = "Raum erstellen"
+    help_text = "Startet den Workflow für nen neuen Raum."
 
     async def run(self, context):
         # Start validation workflow
@@ -865,8 +865,8 @@ class EditRoomCommand(BaseCommand):
     name = "edit_room"
     category = CommandCategory.SYSOP
     permission_level = PermissionLevel.SYSOP
-    short_text = "Edit room"
-    help_text = "Edit a room's characteristics"
+    short_text = "Raum bearbeiten"
+    help_text = "Ändert die Eigenschaften von diesem Raum."
 
 
 @register_command
@@ -875,8 +875,8 @@ class EditUserCommand(BaseCommand):
     name = "edit_user"
     category = CommandCategory.SYSOP
     permission_level = PermissionLevel.SYSOP
-    short_text = "Edit user"
-    help_text = "Edit a user's characteristics"
+    short_text = "User bearbeiten"
+    help_text = "Ändert die Eigenschaften von nem User."
 
 
 @register_command
@@ -885,5 +885,5 @@ class FastForwardCommand(BaseCommand):
     name = "fast_forward"
     category = CommandCategory.UNUSUAL
     permission_level = PermissionLevel.USER
-    short_text = "Fast-forward"
-    help_text = "Fast-forward to the latest message in the current room, skipping over unread messages. This resets your last-read pointer to the latest message."
+    short_text = "Vorspulen"
+    help_text = "Spult direkt zur neuesten Nachricht in diesem Raum vor und überspringt den ganzen Rest."

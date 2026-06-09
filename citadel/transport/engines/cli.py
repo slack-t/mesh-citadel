@@ -87,7 +87,7 @@ class CLIFormatter:
         # Get current room for prompt
         session_state = session_manager.get_session_state(session_id)
         if not session_state or not session_state.current_room:
-            return "What now? (H for help)"
+            return "Was geht ab? (H für Hilfe)"
 
         # Get room name
         from citadel.room.room import Room
@@ -99,7 +99,7 @@ class CLIFormatter:
         except Exception:
             room_name = f"Room {session_state.current_room}"
 
-        return f"In {room_name}. What now? (H for help)"
+        return f"Raum: {room_name}. Was geht ab? (H für Hilfe)"
 
 
 class CommandRouter:

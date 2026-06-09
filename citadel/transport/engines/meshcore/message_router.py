@@ -209,7 +209,7 @@ class MessageRouter:
         session_state = self.session_mgr.get_session_state(session_id)
         prompt = []
         if not session_state or not session_state.current_room:
-            prompt = ["What now? (H for help)"]
+            prompt = ["Was geht ab? (H für Hilfe)"]
         else:
             # sort out notifications. first, pending validations
             from citadel.user.user import User
@@ -242,7 +242,7 @@ class MessageRouter:
                 room_name = room.name
             except Exception:
                 room_name = f"Room {session_state.current_room}"
-            prompt.append(f"In {room_name}. What now? (H for help)")
+            prompt.append(f"Raum: {room_name}. Was geht ab? (H für Hilfe)")
         prompt_str = "\n".join(prompt)
 
         if isinstance(touser, ToUser):
