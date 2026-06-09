@@ -596,7 +596,7 @@ class MailCommand(BaseCommand):
     name = "mail"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
-    short_text = "Zur Post gehen"
+    short_text = "Postamt"
     help_text = "Geht direkt in den Mail-Raum für private Nachrichten."
 
     async def run(self, context):
