@@ -55,7 +55,7 @@ class RegisterUserWorkflow(Workflow):
             if username.lower() in forbidden:
                 return ToUser(
                     session_id=context.session_id,
-                    text=f"'{username}' is reserved and may not be used\nSpitzname (Username):",
+                    text=f"'{username}' ist reserviert und darf nicht benutzt werden.\nSpitzname (Username):",
                     is_error=True,
                     error_code="invalid_username",
                     hints={"type": "text", "workflow": self.kind, "step": 1}
@@ -63,7 +63,7 @@ class RegisterUserWorkflow(Workflow):
             if not is_ascii_username(username):
                 return ToUser(
                     session_id=context.session_id,
-                    text="Usernames are limited to ASCII characters only\nSpitzname (Username):",
+                    text="Benutzernamen dürfen nur aus normalen (ASCII) Zeichen bestehen\nSpitzname (Username):",
                     is_error=True,
                     error_code="invalid_username",
                     hints={"type": "text", "workflow": self.kind, "step": 1}
@@ -71,7 +71,7 @@ class RegisterUserWorkflow(Workflow):
             if not username or len(username) < 3:
                 return ToUser(
                     session_id=context.session_id,
-                    text="Username must be at least 3 characters\nSpitzname (Username):",
+                    text="Benutzername muss mindestens 3 Zeichen lang sein\nSpitzname (Username):",
                     is_error=True,
                     error_code="invalid_username",
                     hints={"type": "text", "workflow": self.kind, "step": 1}
@@ -79,7 +79,7 @@ class RegisterUserWorkflow(Workflow):
             if await User.username_exists(db, username):
                 return ToUser(
                     session_id=context.session_id,
-                    text=f"'{username}' is already in use\nSpitzname (Username):",
+                    text=f"'{username}' ist leider schon vergeben\nSpitzname (Username):",
                     is_error=True,
                     error_code="username_taken",
                     hints={"type": "text", "workflow": self.kind, "step": 1}
@@ -120,7 +120,7 @@ class RegisterUserWorkflow(Workflow):
             if not display_name:
                 return ToUser(
                     session_id=context.session_id,
-                    text="Display name cannot be empty.",
+                    text="Anzeigename darf nicht leer sein, Digger.",
                     is_error=True,
                     error_code="invalid_display_name"
                 )
@@ -148,7 +148,7 @@ class RegisterUserWorkflow(Workflow):
             if not password or len(password) < 6:
                 return ToUser(
                     session_id=context.session_id,
-                    text="Password must be at least 6 characters.",
+                    text="Dein Passwort muss mindestens 6 Zeichen lang sein. Sei mal n bisschen kreativ!",
                     is_error=True,
                     error_code="invalid_password"
                 )
@@ -172,7 +172,7 @@ class RegisterUserWorkflow(Workflow):
                         session_id=context.session_id,
                         text=f"{step_num}: {terms}\nBist du cool mit den Regeln?",
                         hints={"type": "choice", "options": [
-                            "yes", "no"], "workflow": self.kind, "step": 4}
+                            "ja", "nein"], "workflow": self.kind, "step": 4}
                     )
                 else:
                     log.warning("Terms agreement disabled, skipping")
@@ -191,7 +191,7 @@ class RegisterUserWorkflow(Workflow):
         # Step 4: Terms
         if step == 4:
             agree = command.lower() if command else ""
-            if agree not in ("yes", "y"):
+            if agree not in ("ja", "j", "yes", "y"):
                 # Track rejection attempts
                 reject_count = data.get("terms_reject_count", 0) + 1
                 data["terms_reject_count"] = reject_count
@@ -227,10 +227,10 @@ class RegisterUserWorkflow(Workflow):
                 terms = context.config.bbs["registration"]["terms"]
                 return ToUser(
                     session_id=context.session_id,
-                    text=(f"{step_num}: You must agree to the terms. "
-                          f"{attempts_left} tries left.\n\n{terms}\nAgree?"),
+                    text=(f"{step_num}: Du musst den Regeln zustimmen! "
+                          f"{attempts_left} Versuche übrig.\n\n{terms}\nEinverstanden?"),
                     hints={"type": "choice", "options": [
-                        "yes", "no"], "workflow": self.kind, "step": 4}
+                        "ja", "nein"], "workflow": self.kind, "step": 4}
                 )
             data["agreed"] = True
             context.session_mgr.set_workflow(
@@ -253,18 +253,18 @@ class RegisterUserWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text=f"{step_num}: Submit registration?",
+                text=f"{step_num}: Registrierung abschicken? (ja/nein)",
                 hints={"type": "choice", "options": [
-                    "yes", "no"], "workflow": self.kind, "step": 6}
+                    "ja", "nein"], "workflow": self.kind, "step": 6}
             )
 
         # Step 6: Finalize
         if step == 6:
             confirm = command.lower() if command else ""
-            if confirm not in ("yes", "y"):
+            if confirm not in ("ja", "j", "yes", "y"):
                 return ToUser(
                     session_id=context.session_id,
-                    text="Registration not submitted.",
+                    text="Registrierung abgebrochen. Na gut, dann halt nicht.",
                     is_error=True,
                     error_code="registration_cancelled"
                 )
@@ -282,7 +282,7 @@ class RegisterUserWorkflow(Workflow):
                 context.session_mgr.clear_workflow(context.session_id)
                 return ToUser(
                     session_id=context.session_id,
-                    text=f"{step_num}: Welcome, Sysop! You now have full system access.",
+                    text=f"{step_num}: Moin Sysop! Du bist der Boss und hast jetzt alle Rechte.",
                     hints={"prompt_next": True}
                 )
             else:
