@@ -43,8 +43,8 @@ class AsyncMeshCitadelCLI:
 
         # Message display area (top, scrollable, read-only, not focusable)
         self.message_area = TextArea(
-            text="Welcome to mesh-citadel CLI (async version)\n"
-                 "Type '/help' for local commands\n\n",
+            text="Moin! Willkommen in der Mesh-Citadel CLI (Asynchron & abgefahren)\n"
+                 "Tippe '/hilfe' für lokale Befehle\n\n",
             read_only=True,
             focusable=False,  # Prevent focus from going here
             scrollbar=True,
@@ -138,24 +138,24 @@ class AsyncMeshCitadelCLI:
     def _get_status_text(self):
         """Get current status bar text (replaces /info command)."""
         # Connection status
-        conn_status = "Conn" if self.socket_connected else "No conn"
+        conn_status = "Drin" if self.socket_connected else "Draußen"
 
         # Authentication and mode
         if self.logged_in:
             auth_status = f"User: {self.username or self.node_id or 'unknown'}"
         else:
-            auth_status = "Not logged in"
+            auth_status = "Wer bist du denn?"
 
-        mode_status = "Workflow" if self.in_workflow else "Command"
+        mode_status = "Workflow" if self.in_workflow else "Kommando"
 
         # Session info
-        session_info = f"SID: {self.session_id or 'none'}"
+        session_info = f"SID: {self.session_id or 'nö'}"
 
         # Build status line
         if self.socket_connected:
             return f"{conn_status} | {auth_status} | {mode_status} | {session_info}"
         else:
-            return f"{conn_status} | Socket: {self.socket_path} | Use '/connect <node>' to begin"
+            return f"{conn_status} | Buchse: {self.socket_path} | Mach '/verbinden <node>' zum Starten"
 
     def _add_message(self, text: str):
         """Add a message to the display area."""
@@ -194,49 +194,49 @@ class AsyncMeshCitadelCLI:
         cmd = parts[0].lower()
         args = parts[1:] if len(parts) > 1 else []
 
-        if cmd == 'help':
-            self._add_message("Local CLI commands:")
-            self._add_message("  /help             - Show this help")
-            self._add_message("  /connect <node>   - Connect to BBS as node")
-            self._add_message("  /disconnect       - Disconnect from BBS")
-            self._add_message("  /info             - Show detailed connection info")
-            self._add_message("  /quit             - Exit CLI")
+        if cmd == 'hilfe':
+            self._add_message("Lokale CLI-Befehle (geheim & mächtig):")
+            self._add_message("  /hilfe             - Zeigt diesen coolen Text")
+            self._add_message("  /verbinden <node>  - Hacke dich als Node ins BBS")
+            self._add_message("  /trennen           - Zieht den Stecker vom BBS")
+            self._add_message("  /info              - Nerd-Stats zur Verbindung")
+            self._add_message("  /tschues           - Mach's gut, Schätzelein!")
             self._add_message("")
-            self._add_message("Connection status is always shown in the status bar below.")
-            self._add_message("After connecting, type BBS commands directly (no / prefix).")
+            self._add_message("Verbindungsstatus gibt's unten in der Leiste.")
+            self._add_message("Nach dem Verbinden tippst du BBS-Befehle direkt (ohne / davor).")
             self._add_message("")
 
         elif cmd == 'info':
             # Detailed info (beyond what's in status bar)
-            self._add_message("=== Connection Information ===")
-            self._add_message(f"Socket path: {self.socket_path}")
-            self._add_message(f"Socket exists: {self.socket_path.exists()}")
-            self._add_message(f"Socket connected: {self.socket_connected}")
-            self._add_message(f"Node ID: {self.node_id or 'none'}")
-            self._add_message(f"Session ID: {self.session_id or 'none'}")
-            self._add_message(f"Username: {self.username or 'none'}")
-            self._add_message(f"Logged in: {self.logged_in}")
-            self._add_message(f"In workflow: {self.in_workflow}")
+            self._add_message("=== Supergeheime Verbindungs-Info ===")
+            self._add_message(f"Socket Pfad: {self.socket_path}")
+            self._add_message(f"Socket existiert: {self.socket_path.exists()}")
+            self._add_message(f"Verbindung steht: {self.socket_connected}")
+            self._add_message(f"Node ID: {self.node_id or 'nö'}")
+            self._add_message(f"Session ID: {self.session_id or 'nö'}")
+            self._add_message(f"Username: {self.username or 'nö'}")
+            self._add_message(f"Eingeloggt: {self.logged_in}")
+            self._add_message(f"Im Workflow: {self.in_workflow}")
             self._add_message("")
 
-        elif cmd in ['connect', 'c', 'conn']:
+        elif cmd in ['verbinden', 'v']:
             if not args:
-                self._add_message("Usage: /connect <node_id>")
+                self._add_message("Äh, wie wär's mit: /verbinden <node_id>")
                 self._add_message("")
                 return
 
             await self._connect_to_bbs(args[0])
 
-        elif cmd in ['disconnect', 'd']:
+        elif cmd in ['trennen', 't']:
             await self._disconnect_from_bbs()
 
-        elif cmd in ['quit', 'q']:
-            self._add_message("Goodbye!")
+        elif cmd in ['tschues', 'q']:
+            self._add_message("Tschüssikowski!")
             self.app.exit()
 
         else:
-            self._add_message(f"Unknown local command: /{cmd}")
-            self._add_message("Type '/help' for available commands")
+            self._add_message(f"Hä? Was soll /{cmd} sein?")
+            self._add_message("Tippe '/hilfe' wenn du nicht weiter weißt.")
             self._add_message("")
 
     async def _connect_to_bbs(self, node_id: str):

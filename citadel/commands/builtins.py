@@ -37,7 +37,7 @@ async def scan_messages(context, msg_ids):
     if not msg_ids:
         return ToUser(
             session_id=context.session_id,
-            text="No messages"
+            text="Gähn... absolut tote Hose (Keine Nachrichten)"
         )
 
     msgs = []
@@ -70,7 +70,7 @@ async def read_messages(context, msg_ids):
     if not msg_ids:
         return ToUser(
             session_id=context.session_id,
-            text="No unread messages."
+            text="Nix Neues hier, Digger."
         )
 
     to_user_list = []
@@ -106,7 +106,7 @@ async def read_messages(context, msg_ids):
 
 @register_command
 class GoNextUnreadCommand(BaseCommand):
-    code = "G"
+    code = "O"
     name = "go_next_unread"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -134,23 +134,23 @@ class GoNextUnreadCommand(BaseCommand):
             if lobby_has_unread:
                 return ToUser(
                     session_id=context.session_id,
-                    text=f"You are now in room '{new_room.name}'. New messages are available in other rooms."
+                    text=f"Willkommen im Raum '{new_room.name}'. New messages are available in other rooms."
                 )
             else:
                 return ToUser(
                     session_id=context.session_id,
-                    text=f"You are now in room '{new_room.name}'. No rooms with unread messages found."
+                    text=f"Willkommen im Raum '{new_room.name}'. No rooms with unread messages found."
                 )
 
         return ToUser(
             session_id=context.session_id,
-            text=f"You are now in room '{new_room.name}'."
+            text=f"Willkommen im Raum '{new_room.name}'."
         )
 
 
 @register_command
 class EnterMessageCommand(BaseCommand):
-    code = "E"
+    code = "U"
     name = "enter_message"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -211,7 +211,7 @@ class ReverseReadCommand(BaseCommand):
 
 @register_command
 class ForwardReadCommand(BaseCommand):
-    code = "F"
+    code = "P"
     name = "forward_read"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -249,7 +249,7 @@ class ReadNewMessagesCommand(BaseCommand):
 
 @register_command
 class KnownRoomsCommand(BaseCommand):
-    code = "K"
+    code = "R"
     name = "known_rooms"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -270,7 +270,7 @@ class KnownRoomsCommand(BaseCommand):
         if not rooms:
             return ToUser(
                 session_id=context.session_id,
-                text="No rooms available to you."
+                text="Sorry, für dich gibt's hier keine Räume."
             )
 
         lines = []
@@ -291,7 +291,7 @@ class KnownRoomsCommand(BaseCommand):
         room_list = "\n".join(lines)
         return ToUser(
             session_id=context.session_id,
-            text=f"Known rooms:\n\n{room_list}"
+            text=f"Hier die geilen Räume:\n\n{room_list}"
         )
 
 
@@ -307,7 +307,7 @@ class IgnoreRoomCommand(BaseCommand):
 
 @register_command
 class QuitCommand(BaseCommand):
-    code = "Q"
+    code = "T"
     name = "quit"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -326,19 +326,19 @@ class QuitCommand(BaseCommand):
         )
 
         if login_prompt:
-            login_prompt.text = "Goodbye!\n\n" + login_prompt.text
+            login_prompt.text = "Hau rein!\n\n" + login_prompt.text
             return login_prompt
         else:
             # Fallback if login workflow unavailable
             return ToUser(
                 session_id=state.session_id,
-                text="Goodbye! Please reconnect to log in again."
+                text="Tschüssikowski! Komm wieder wenn du eingeloggt bist."
             )
 
 
 @register_command
 class StopCommand(BaseCommand):
-    code = "STOP"  # Use full word since this is a special case
+    code = "STOPP"  # Use full word since this is a special case
     name = "stop"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -353,13 +353,13 @@ class StopCommand(BaseCommand):
             mword = "messages"
         return ToUser(
             session_id=context.session_id,
-            text=f"Stopped {num} pending {mword}"
+            text=f"Notbremse gezogen: {num} pending {mword}"
         )
 
 
 @register_command
 class CancelCommand(BaseCommand):
-    code = "CANCEL"  # Use full word since this is a special case
+    code = "ABBRUCH"  # Use full word since this is a special case
     name = "cancel"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -399,19 +399,19 @@ class CancelCommand(BaseCommand):
                 context.config, context.db, context.session_id
             )
             if login_prompt:
-                login_prompt.text = f"Cancelled {workflow_state.kind} workflow.\n\n" + \
+                login_prompt.text = f"Eiskalt abgebrochen: {workflow_state.kind} workflow.\n\n" + \
                     login_prompt.text
                 return login_prompt
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Cancelled {workflow_state.kind} workflow."
+            text=f"Eiskalt abgebrochen: {workflow_state.kind} workflow."
         )
 
 
 @register_command
 class ScanMessagesCommand(BaseCommand):
-    code = "S"
+    code = "U"
     name = "scan_messages"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
@@ -430,7 +430,7 @@ class ScanMessagesCommand(BaseCommand):
 
 @register_command
 class ChangeRoomCommand(BaseCommand):
-    code = "C"
+    code = "G"
     name = "change_room"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
@@ -460,7 +460,7 @@ class ChangeRoomCommand(BaseCommand):
             context.session_id, next_room.room_id)
         return ToUser(
             session_id=context.session_id,
-            text=f"You are now in room '{next_room.name}'."
+            text=f"Willkommen im Raum '{next_room.name}'."
         )
 
 
@@ -539,7 +539,7 @@ class HelpCommand(BaseCommand):
         if not cmd_class:
             return ToUser(
                 session_id=session_id,
-                text=f"Unknown command: {command_code}",
+                text=f"Hä? Was soll das sein: {command_code}",
                 is_error=True,
                 error_code="unknown_command"
             )
@@ -612,13 +612,13 @@ class MailCommand(BaseCommand):
             context.session_id, mail_room.room_id)
         return ToUser(
             session_id=context.session_id,
-            text=f"You are now in room '{mail_room.name}'."
+            text=f"Willkommen im Raum '{mail_room.name}'."
         )
 
 
 @register_command
 class WhoCommand(BaseCommand):
-    code = "W"
+    code = "O"
     name = "who"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
@@ -695,13 +695,13 @@ class WhoCommand(BaseCommand):
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Users currently online:\n{user_list}"
+            text=f"Diese Dudes sind online:\n{user_list}"
         )
 
 
 @register_command
 class DeleteMessageCommand(BaseCommand):
-    code = "D"
+    code = "L"
     name = "delete_message"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -765,7 +765,7 @@ class BlockUserCommand(BaseCommand):
 
 @register_command
 class ValidateUsersCommand(BaseCommand):
-    code = "V"
+    code = "P"
     name = "validate_users"
     category = CommandCategory.AIDE
     permission_level = PermissionLevel.AIDE
@@ -821,7 +821,7 @@ class ValidateUsersCommand(BaseCommand):
 
 @register_command
 class CreateRoomCommand(BaseCommand):
-    code = ".C"
+    code = ".N"
     name = "create_room"
     category = CommandCategory.UNUSUAL
     permission_level = PermissionLevel.USER
@@ -861,7 +861,7 @@ class CreateRoomCommand(BaseCommand):
 
 @register_command
 class EditRoomCommand(BaseCommand):
-    code = ".ER"
+    code = ".RR"
     name = "edit_room"
     category = CommandCategory.SYSOP
     permission_level = PermissionLevel.SYSOP
@@ -871,7 +871,7 @@ class EditRoomCommand(BaseCommand):
 
 @register_command
 class EditUserCommand(BaseCommand):
-    code = ".EU"
+    code = ".UB"
     name = "edit_user"
     category = CommandCategory.SYSOP
     permission_level = PermissionLevel.SYSOP
@@ -881,7 +881,7 @@ class EditUserCommand(BaseCommand):
 
 @register_command
 class FastForwardCommand(BaseCommand):
-    code = ".FF"
+    code = ".S"
     name = "fast_forward"
     category = CommandCategory.UNUSUAL
     permission_level = PermissionLevel.USER

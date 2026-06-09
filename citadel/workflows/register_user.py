@@ -25,7 +25,7 @@ class RegisterUserWorkflow(Workflow):
 
     async def start(self, context):
         """Start the registration workflow by prompting for username."""
-        text = "1: Registration\n\nEnter a username:"
+        text = "1: Registration\n\nSpitzname (Username):"
         return ToUser(
             session_id=context.session_id,
             text=text,
@@ -55,7 +55,7 @@ class RegisterUserWorkflow(Workflow):
             if username.lower() in forbidden:
                 return ToUser(
                     session_id=context.session_id,
-                    text=f"'{username}' is reserved and may not be used\nEnter a username:",
+                    text=f"'{username}' is reserved and may not be used\nSpitzname (Username):",
                     is_error=True,
                     error_code="invalid_username",
                     hints={"type": "text", "workflow": self.kind, "step": 1}
@@ -63,7 +63,7 @@ class RegisterUserWorkflow(Workflow):
             if not is_ascii_username(username):
                 return ToUser(
                     session_id=context.session_id,
-                    text="Usernames are limited to ASCII characters only\nEnter a username:",
+                    text="Usernames are limited to ASCII characters only\nSpitzname (Username):",
                     is_error=True,
                     error_code="invalid_username",
                     hints={"type": "text", "workflow": self.kind, "step": 1}
@@ -71,7 +71,7 @@ class RegisterUserWorkflow(Workflow):
             if not username or len(username) < 3:
                 return ToUser(
                     session_id=context.session_id,
-                    text="Username must be at least 3 characters\nEnter a username:",
+                    text="Username must be at least 3 characters\nSpitzname (Username):",
                     is_error=True,
                     error_code="invalid_username",
                     hints={"type": "text", "workflow": self.kind, "step": 1}
@@ -79,7 +79,7 @@ class RegisterUserWorkflow(Workflow):
             if await User.username_exists(db, username):
                 return ToUser(
                     session_id=context.session_id,
-                    text=f"'{username}' is already in use\nEnter a username:",
+                    text=f"'{username}' is already in use\nSpitzname (Username):",
                     is_error=True,
                     error_code="username_taken",
                     hints={"type": "text", "workflow": self.kind, "step": 1}
@@ -110,7 +110,7 @@ class RegisterUserWorkflow(Workflow):
 
             return ToUser(
                 session_id=context.session_id,
-                text=f"{step_num}: Choose a display name.",
+                text=f"{step_num}: Wie sollen dich andere nennen? (Anzeigename):",
                 hints={"type": "text", "workflow": self.kind, "step": 2}
             )
 
@@ -138,7 +138,7 @@ class RegisterUserWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text=f"{step_num}: Choose a password.",
+                text=f"{step_num}: Such dir ein knackiges Passwort aus:",
                 hints={"type": "password", "workflow": self.kind, "step": 3}
             )
 
@@ -170,7 +170,7 @@ class RegisterUserWorkflow(Workflow):
                     )
                     return ToUser(
                         session_id=context.session_id,
-                        text=f"{step_num}: {terms}\nDo you agree to the terms?",
+                        text=f"{step_num}: {terms}\nBist du cool mit den Regeln?",
                         hints={"type": "choice", "options": [
                             "yes", "no"], "workflow": self.kind, "step": 4}
                     )
@@ -207,12 +207,12 @@ class RegisterUserWorkflow(Workflow):
                     )
 
                     if login_prompt:
-                        login_prompt.text = "Registration cancelled due to terms rejection.\n\n" + login_prompt.text
+                        login_prompt.text = "Wer die Regeln nicht mag, fliegt raus.\n\n" + login_prompt.text
                         return login_prompt
                     else:
                         return ToUser(
                             session_id=session_id,
-                            text="Registration cancelled. Reconnect to try again",
+                            text="Registrierung in die Tonne gekloppt. Komm wieder, wenn du mutiger bist.",
                             is_error=True,
                             error_code="terms_rejected_final"
                         )
@@ -239,7 +239,7 @@ class RegisterUserWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text=f"{step_num}: Tell us a bit about yourself.",
+                text=f"{step_num}: Erzähl was über dich (Wer bist du, was machst du hier?):",
                 hints={"type": "text", "workflow": self.kind, "step": 5}
             )
 
@@ -308,7 +308,7 @@ class RegisterUserWorkflow(Workflow):
                 f"New user {data['display_name']} ({username}) registered")
             return ToUser(
                 session_id=context.session_id,
-                text=f"{step_num}: Registration complete! You have limited access until validated"
+                text=f"{step_num}: Boom! Registriert! Du darfst aber noch nicht viel machen, bis du gecheckt wurdest."
             )
 
         return ToUser(

@@ -22,14 +22,14 @@ class LoginWorkflow(Workflow):
             # Prompt for username (called on workflow start or with command=None)
             # Include welcome message at start of login process
             welcome = context.config.bbs.get(
-                "welcome_message", "Welcome to Mesh-Citadel.")
+                "welcome_message", "Moin! Willkommen in der Mesh-Citadel (Beste wo gibt).")
             context.session_mgr.set_workflow(
                 context.session_id,
                 WorkflowState(kind=self.kind, step=2, data=data)
             )
             return ToUser(
                 session_id=context.session_id,
-                text=f"1: {welcome}\n\nEnter your username:",
+                text=f"1: {welcome}\n\nWer bist du? (Username):",
                 hints={"type": "text", "workflow": self.kind, "step": 2}
             )
 
@@ -89,7 +89,7 @@ class LoginWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text="2: Enter your password:",
+                text="2: Passwort her:",
                 hints={"type": "password", "workflow": self.kind, "step": 3}
             )
 
@@ -107,7 +107,7 @@ class LoginWorkflow(Workflow):
                     context.session_mgr.clear_workflow(context.session_id)
                     return ToUser(
                         session_id=context.session_id,
-                        text="Too many failed login attempts. Please try again later.",
+                        text="Puh, du hast zu oft verkackt. Komm später wieder.",
                         is_error=True,
                         error_code="login_blocked"
                     )
@@ -118,7 +118,7 @@ class LoginWorkflow(Workflow):
                 )
                 return ToUser(
                     session_id=context.session_id,
-                    text="Login failed. Try again.\nEnter your username:",
+                    text="Nö, das war nix. Probier's nochmal.\nWer bist du? (Username):",
                     hints={"type": "text", "workflow": self.kind, "step": 2},
                     is_error=True,
                     error_code="login_failed"
@@ -151,7 +151,7 @@ class LoginWorkflow(Workflow):
             await room.load()
             return ToUser(
                 session_id=context.session_id,
-                text=(f"3: Welcome, {username}! You are now logged in.\n"
+                text=(f"3: Schön dass du da bist, {username}! Du bist drin!\n"
                       f"{mail_msg}")
             )
 
