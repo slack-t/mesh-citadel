@@ -62,7 +62,7 @@ class MessageRouter:
                     if session_id:
                         error_msg = ToUser(
                             session_id=session_id,
-                            text="System temporarily unavailable. Please try later."
+                            text="System grad down, Digger. Versuch's später nochmal."
                         )
                         await self.session_mgr.send_msg(session_id, error_msg)
                         log.info(
@@ -128,7 +128,7 @@ class MessageRouter:
                 # Handle welcome back vs. regular command
                 if is_new_session:
                     # This is a reconnection after timeout - send welcome back message
-                    welcome_msg = f"Welcome back, {username}! You've been automatically logged in."
+                    welcome_msg = f"Willkommen zurück, {username}! Wurdest automatisch eingeloggt."
                     welcome_msg = await self.insert_prompt(session_id, welcome_msg)
                     touser = ToUser(session_id=session_id, text=welcome_msg)
                     await self.session_mgr.send_msg(session_id, touser)
@@ -154,7 +154,7 @@ class MessageRouter:
             try:
                 error_msg = ToUser(
                     session_id=session_id,
-                    text="Authentication error. Please try again."
+                    text="Auth-Fehler. Probier's nochmal, du packst das."
                 )
                 await self.session_mgr.send_msg(session_id, error_msg)
             except:
@@ -187,7 +187,7 @@ class MessageRouter:
             try:
                 error_msg = ToUser(
                     session_id=session_id,
-                    text="Command processing error. Please try again."
+                    text="Kommando-Fehler. Irgendwas ist kaputt, probier's nochmal."
                 )
                 await self.session_mgr.send_msg(session_id, error_msg)
             except:

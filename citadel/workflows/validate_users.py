@@ -48,7 +48,7 @@ class ValidateUsersWorkflow(Workflow):
 
     async def _show_current_user(self, context):
         """Show current user details concisely."""
-        commands_text = "A=approve R=reject S=skip Q=quit"
+        commands_text = "A=freigeben R=ablehnen S=überspringen Q=abhauen"
         data = context.wf_state.data
         pending_users = data.get("pending_users", [])
         current_index = data.get("current_index", 0)

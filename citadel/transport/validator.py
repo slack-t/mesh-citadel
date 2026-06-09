@@ -32,7 +32,7 @@ class InputValidator:
                 f"Input validator: Invalid session ID {packet.session_id}")
             return ToUser(
                 session_id=packet.session_id,
-                text="Session expired or invalid.",
+                text="Session abgelaufen oder kaputt.",
                 is_error=True,
                 error_code="invalid_session"
             )
@@ -49,7 +49,7 @@ class InputValidator:
             )
             return ToUser(
                 session_id=packet.session_id,
-                text=f"Internal error: Transport sent {packet.payload_type} but session expects {expected_type}.",
+                text=f"Interner Fehler: Transport schickt {packet.payload_type}, aber Session will {expected_type}.",
                 is_error=True,
                 error_code="transport_error"
             )
@@ -64,7 +64,7 @@ class InputValidator:
             )
             return ToUser(
                 session_id=packet.session_id,
-                text=f"Internal error: Invalid {packet.payload_type} format from transport.",
+                text=f"Interner Fehler: Kaputtes {packet.payload_type} Format vom Transport.",
                 is_error=True,
                 error_code="transport_error"
             )

@@ -206,7 +206,7 @@ class CommandRouter:
         """Handle command parsing failures."""
         error_result = ToUser(
             session_id=session_id or "",
-            text=f"Unknown command: {command_line.strip()}. Type H for help.",
+            text=f"Hä? Kenn ich nicht: {command_line.strip()}. Tipp mal H für Hilfe.",
             is_error=True,
             error_code="unknown_command"
         )

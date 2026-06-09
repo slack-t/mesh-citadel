@@ -25,7 +25,7 @@ class RegisterUserWorkflow(Workflow):
 
     async def start(self, context):
         """Start the registration workflow by prompting for username."""
-        text = "1: Registration\n\nSpitzname (Username):"
+        text = "1: Registrierung\n\nSpitzname (Username):"
         return ToUser(
             session_id=context.session_id,
             text=text,
