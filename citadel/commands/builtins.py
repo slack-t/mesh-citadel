@@ -249,7 +249,7 @@ class ReadNewMessagesCommand(BaseCommand):
 
 @register_command
 class KnownRoomsCommand(BaseCommand):
-    code = "R"
+    code = "K"
     name = "known_rooms"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -291,7 +291,7 @@ class KnownRoomsCommand(BaseCommand):
         room_list = "\n".join(lines)
         return ToUser(
             session_id=context.session_id,
-            text=f"Hier die geilen Räume:\n\n{room_list}"
+            text=f"Hier sind unsere Räume:\n\n{room_list}"
         )
 
 
@@ -524,11 +524,18 @@ class HelpCommand(BaseCommand):
             menu_lines.append(f"{cmd.code}-{cmd.short_text}")
 
         if not menu_lines:
-            return "No available commands in this category."
+            return "Keine verfügbaren Kommandos in dieser Kategorie."
 
         # Add category header and join lines
-        category_name = category.name.title()
-        header = f"{category_name} Commands:"
+        category_map = {
+            "Common": "Standard",
+            "Uncommon": "Fortgeschritten",
+            "Unusual": "Selten",
+            "Aide": "Aide",
+            "Sysop": "Sysop"
+        }
+        category_name = category_map.get(category.name.title(), category.name.title())
+        header = f"{category_name} Kommandos:"
         return header + "\n" + "  ".join(menu_lines)
 
     async def _show_command_help(self, session_id, command_code, user, room):

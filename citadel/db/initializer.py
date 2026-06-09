@@ -196,7 +196,7 @@ async def initialize_system_rooms(db_manager, config):
                                           [room_id]
                                           )
         if result:
-            name, description, prev_neighbor, current_next = result[0]
+            db_name, db_desc, prev_neighbor, current_next = result[0]
             preserved_next = current_next if next_id is None else next_id
             await db_manager.execute("""
                 UPDATE rooms
@@ -205,7 +205,7 @@ async def initialize_system_rooms(db_manager, config):
                     prev_neighbor = ?,
                     next_neighbor = ?
                 WHERE id = ?""",
-                                     [name, description, prev_id,
+                                     [name, db_desc, prev_id,
                                          preserved_next, room_id]
                                      )
             log.debug(

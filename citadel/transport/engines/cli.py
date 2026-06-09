@@ -178,7 +178,7 @@ class CommandRouter:
     def _build_packet(self, command_line: str, session_id: Optional[str]) -> Optional[FromUser]:
         """Build a FromUser packet from command line input."""
         command = self.text_parser.parse_command(command_line)
-        if command is None:
+        if not command:
             return None
 
         wf_state = self.session_manager.get_workflow(session_id)
