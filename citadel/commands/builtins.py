@@ -169,7 +169,7 @@ class EnterMessageCommand(BaseCommand):
         if not state:
             return ToUser(
                 session_id=context.session_id,
-                text="Session not found",
+                text="Session nicht gefunden",
                 is_error=True,
                 error_code="no_session"
             )
@@ -374,7 +374,7 @@ class CancelCommand(BaseCommand):
         if not workflow_state:
             return ToUser(
                 session_id=context.session_id,
-                text="No active workflow to cancel.",
+                text="Gibt nix abzubrechen, chill.",
                 is_error=True,
                 error_code="no_workflow"
             )
@@ -452,7 +452,7 @@ class ChangeRoomCommand(BaseCommand):
         except RoomNotFoundError:
             return ToUser(
                 session_id=context.session_id,
-                text=f"Room {self.args} not found.",
+                text=f"Raum {self.args} nicht gefunden.",
                 is_error=True,
                 error_code="no_next_room"
             )
@@ -547,7 +547,7 @@ class HelpCommand(BaseCommand):
         if not is_allowed(cmd_class.name, user, room):
             return ToUser(
                 session_id=session_id,
-                text=f"You don't have permission to use command {command_code}",
+                text=f"Digger, du hast keine Rechte für {command_code}",
                 is_error=True,
                 error_code="permission_denied"
             )
@@ -555,7 +555,7 @@ class HelpCommand(BaseCommand):
         if not cmd_class.is_implemented():
             return ToUser(
                 session_id=session_id,
-                text=f"{cmd_class.code} - {cmd_class.short_text}\n(Not yet implemented)"
+                text=f"{cmd_class.code} - {cmd_class.short_text}\n(Noch nicht eingebaut)"
             )
 
         # Build detailed help text
@@ -604,7 +604,7 @@ class MailCommand(BaseCommand):
         except RoomNotFoundError:
             return ToUser(
                 session_id=context.session_id,
-                text=f"Room {self.args} not found.",
+                text=f"Raum {self.args} nicht gefunden.",
                 is_error=True,
                 error_code="no_next_room"
             )
@@ -686,7 +686,7 @@ class WhoCommand(BaseCommand):
         if not online_users:
             return ToUser(
                 session_id=context.session_id,
-                text="No users currently online."
+                text="Alleine hier. Keiner online."
             )
 
         # Sort alphabetically
@@ -720,7 +720,7 @@ class DeleteMessageCommand(BaseCommand):
         if not self.args:
             return ToUser(
                 session_id=context.session_id,
-                text='Message ID number must be specified. No action taken.',
+                text='Du musst schon ne Message-ID angeben. Nix passiert.',
                 is_error=True
             )
         msg = await context.msg_mgr.get_message(self.args, user)
@@ -741,14 +741,14 @@ class DeleteMessageCommand(BaseCommand):
                 f'Message {msg["id"]} deleted from room {room.name} by {user.username} (allowed because {reason})')
             return ToUser(
                 session_id=context.session_id,
-                text=f"Message {msg['id']} deleted"
+                text=f"Nachricht {msg['id']} in die Tonne gekloppt."
             )
         else:
             log.info(
                 f'User {user.username} tried to delete message {msg["id"]} in room {room.name}, but was denied (no permission)')
             return ToUser(
                 session_id=context.session_id,
-                text=f"You don't have permission to delete message {msg['id']}",
+                text=f"Finger weg! Du darfst Nachricht {msg['id']} nicht löschen.",
                 is_error=True
             )
 
@@ -781,7 +781,7 @@ class ValidateUsersCommand(BaseCommand):
         if not pending_users:
             return ToUser(
                 session_id=context.session_id,
-                text="No users pending validation."
+                text="Niemand da, der auf Freigabe wartet."
             )
 
         # Start validation workflow
@@ -809,7 +809,7 @@ class ValidateUsersCommand(BaseCommand):
 
         return ToUser(
             session_id=context.session_id,
-            text="Validation workflow not available.",
+            text="Validierungs-Workflow nicht am Start.",
             is_error=True,
             error_code="workflow_unavailable"
         )
@@ -853,7 +853,7 @@ class CreateRoomCommand(BaseCommand):
 
         return ToUser(
             session_id=context.session_id,
-            text="Room creation workflow not available.",
+            text="Raum-Erstellungs-Workflow nicht am Start.",
             is_error=True,
             error_code="workflow_unavailable"
         )

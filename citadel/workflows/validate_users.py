@@ -18,7 +18,7 @@ class ValidateUsersWorkflow(Workflow):
 
     async def start(self, context):
         """Start validation workflow - show commands once and first user."""
-        intro_text = "User Validation\n\n"
+        intro_text = "User Validierung\n\n"
         user_info = await self._show_current_user(context)
         user_info.text = intro_text + user_info.text
         return user_info
@@ -36,12 +36,12 @@ class ValidateUsersWorkflow(Workflow):
             context.session_mgr.clear_workflow(context.session_id)
             return ToUser(
                 session_id=context.session_id,
-                text="Validation session ended."
+                text="Validierung beendet. Feierabend!"
             )
         else:
             return ToUser(
                 session_id=context.session_id,
-                text="Invalid command. Use A/R/S/Q.",
+                text="Hä? Was? Benutze A/R/S/Q.",
                 is_error=True,
                 error_code="invalid_command"
             )
@@ -57,7 +57,7 @@ class ValidateUsersWorkflow(Workflow):
             context.session_mgr.clear_workflow(context.session_id)
             return ToUser(
                 session_id=context.session_id,
-                text="All users processed!"
+                text="Alle User abgearbeitet! High Five!"
             )
 
         username = pending_users[current_index]
@@ -91,13 +91,13 @@ class ValidateUsersWorkflow(Workflow):
 
         submitted_at, intro_text = validation_info[0]
         if not intro_text or intro_text.strip() == "":
-            intro_text = "No introduction provided."
+            intro_text = "Keine Infos angegeben."
 
         text = f"""User {current_index + 1}/{len(pending_users)}
 {username} ({user.display_name})
-Submitted: {submitted_at}
+Eingereicht: {submitted_at}
 
-Introduction:
+Infos:
 {intro_text}
 
 {commands_text}"""
@@ -137,14 +137,14 @@ Introduction:
             # Move to next user
             await self._advance_to_next_user(context)
             next_user = await self._show_current_user(context)
-            next_user.text = f"'{username}' approved!\n\n" + next_user.text
+            next_user.text = f"'{username}' freigegeben!\n\n" + next_user.text
             return next_user
 
         except Exception as e:
             log.error(f"Failed to approve '{username}': {e}")
             return ToUser(
                 session_id=context.session_id,
-                text=f"Error approving '{username}': {e}",
+                text=f"Fehler beim Freigeben von '{username}': {e}",
                 is_error=True
             )
 
@@ -178,14 +178,14 @@ Introduction:
             # Move to next user
             await self._advance_to_next_user(context)
             next_user = await self._show_current_user(context)
-            next_user.text = f"'{username}' rejected.\n\n" + next_user.text
+            next_user.text = f"'{username}' abgelehnt.\n\n" + next_user.text
             return next_user
 
         except Exception as e:
             log.error(f"Failed to reject '{username}': {e}")
             return ToUser(
                 session_id=context.session_id,
-                text=f"Error rejecting '{username}': {e}",
+                text=f"Fehler beim Ablehnen von '{username}': {e}",
                 is_error=True
             )
 

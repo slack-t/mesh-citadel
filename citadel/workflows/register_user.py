@@ -184,7 +184,7 @@ class RegisterUserWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text=f"{step_num}: Tell us about yourself.",
+                text=f"{step_num}: Erzähl mal was über dich.",
                 hints={"type": "text", "workflow": self.kind, "step": 5}
             )
 
@@ -313,7 +313,7 @@ class RegisterUserWorkflow(Workflow):
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Unknown step {step} in workflow {self.kind}",
+            text=f"Kein Plan was Schritt {step} im Workflow {self.kind} soll",
             is_error=True,
             error_code="invalid_step"
         )

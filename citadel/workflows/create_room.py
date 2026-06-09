@@ -25,7 +25,7 @@ class CreateRoomWorkflow(Workflow):
 
     async def start(self, context):
         """Start the room creation workflow by prompting for room name."""
-        text = "Preparing to create new room.\nPlease enter the room name:"
+        text = "Lass mal nen neuen Raum machen.\nGib mal den Raumnamen ein:"
         return ToUser(
             session_id=context.session_id,
             text=text,
@@ -46,14 +46,14 @@ class CreateRoomWorkflow(Workflow):
             if not is_ascii_string(room_name):
                 return ToUser(
                     session_id=context.session_id,
-                    text="Room names are limited to ASCII characters only",
+                    text="Raumnamen dürfen nur normale (ASCII) Zeichen haben, Digger.",
                     is_error=True,
                     error_code="invalid_room_name"
                 )
             if not room_name or len(room_name) < 3:
                 return ToUser(
                     session_id=context.session_id,
-                    text="Room name must be at least 3 characters.",
+                    text="Raumname muss mindestens 3 Zeichen lang sein.",
                     is_error=True,
                     error_code="invalid_room_name"
                 )
@@ -62,7 +62,7 @@ class CreateRoomWorkflow(Workflow):
                 if room_id:
                     return ToUser(
                         session_id=context.session_id,
-                        text=f"'{room_name}' already exists. Please try again.",
+                        text=f"'{room_name}' gibt's schon. Denk dir was anderes aus.",
                         is_error=True,
                         error_code="room_name_taken"
                     )
@@ -96,12 +96,12 @@ class CreateRoomWorkflow(Workflow):
 
             return ToUser(
                 session_id=context.session_id,
-                text=f"Room {room_name} created!"
+                text=f"Raum '{room_name}' am Start!"
             )
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Unknown step {step} in workflow {self.kind}",
+            text=f"Kein Plan was Schritt {step} im Workflow {self.kind} soll",
             is_error=True,
             error_code="invalid_step"
         )

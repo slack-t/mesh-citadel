@@ -54,7 +54,7 @@ class LoginWorkflow(Workflow):
                 else:
                     return ToUser(
                         session_id=context.session_id,
-                        text="Error: Registration workflow not found",
+                        text="Fehler: Registrierungs-Workflow nicht gefunden",
                         is_error=True,
                         error_code="workflow_not_found"
                     )
@@ -72,9 +72,8 @@ class LoginWorkflow(Workflow):
                 )
                 return ToUser(
                     session_id=context.session_id,
-                    text=(f"User '{data['username']}' not found. Try again or "
-                          "type 'new' to register as a new user.\nEnter your "
-                          "username:"),
+                    text=(f"User '{data['username']}' nicht am Start. Probier's nochmal oder "
+                          "tippe 'new' um dich zu registrieren.\nWer bist du? (Username):"),
                     hints={"type": "text", "workflow": self.kind, "step": 2},
                     is_error=True,
                     error_code="invalid_username"
@@ -129,7 +128,7 @@ class LoginWorkflow(Workflow):
             has_mail = await mail.has_unread_messages(username)
             mail_msg = ""
             if has_mail:
-                mail_msg = "\n* You have unread mail"
+                mail_msg = "\n* Du hast ungelesene Post"
             context.session_mgr.mark_username(context.session_id, username)
             await context.session_mgr.mark_logged_in(context.session_id)
             context.session_mgr.clear_workflow(context.session_id)
@@ -157,7 +156,7 @@ class LoginWorkflow(Workflow):
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Invalid login step: {step}",
+            text=f"Ungültiger Login-Schritt: {step}",
             is_error=True,
             error_code="invalid_login_step"
         )

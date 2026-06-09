@@ -40,14 +40,14 @@ class CommandProcessor:
         if not state:
             return ToUser(
                 session_id=session_id,
-                text="Session expired or invalid.",
+                text="Session abgelaufen oder kaputt.",
                 is_error=True,
                 error_code="invalid_session"
             )
         if not wf_state and not state.logged_in:
             return ToUser(
                 session_id=session_id,
-                text="You must log in to use commands.",
+                text="Du musst dich einloggen, Digger.",
                 is_error=True,
                 error_code="not_logged_in"
             )
@@ -60,7 +60,7 @@ class CommandProcessor:
             if not handler:
                 return ToUser(
                     session_id=session_id,
-                    text=f"Unknown workflow: {wf_state.kind}",
+                    text=f"Kein Plan von diesem Workflow: {wf_state.kind}",
                     is_error=True,
                     error_code="unknown_workflow"
                 )
@@ -84,7 +84,7 @@ class CommandProcessor:
                 else:
                     return ToUser(
                         session_id=session_id,
-                        text="Cannot execute commands while in a workflow. Type 'cancel' to exit the workflow.",
+                        text="Kann keine Befehle ausführen, während du was anderes machst. Tippe 'cancel' zum Abbrechen.",
                         is_error=True,
                         error_code="workflow_active"
                     )
@@ -93,7 +93,7 @@ class CommandProcessor:
         if packet.payload_type.value != "command":
             return ToUser(
                 session_id=session_id,
-                text="Invalid request type outside of workflow.",
+                text="Falscher Request-Typ außerhalb vom Workflow.",
                 is_error=True,
                 error_code="invalid_request_type"
             )
