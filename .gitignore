@@ -4,3 +4,6 @@
 __pycache__
 .claude
 *.log
+.venv/
+venv/
+.pytest_cache/
