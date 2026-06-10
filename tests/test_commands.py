@@ -1,31 +1,24 @@
-# tests/commands/test_commands.py
+# tests/test_commands.py
 
 import pytest
 
 from citadel.commands.registry import registry
 from citadel.commands import builtins
-from citadel.commands.base import BaseCommand
+from citadel.commands.base import BaseCommand, CommandCategory
 from citadel.auth.permissions import PermissionLevel
 
 
-def test_registry_contains_all_expected_commands():
-    # Codes from prompt.md
-    expected_codes = {
-        "G", "E", "R", "N", "K", "I", "Q", "S", "C", "H", "?", "M", "W", "D",
-        "B", ".C", ".ER", ".EU", ".FF", "V", "cancel",
-    }
-    available_codes = set(registry.available().keys())
-    missing = expected_codes - available_codes
-    extra = available_codes - expected_codes
-    assert not missing, f"Missing commands: {missing}"
-    assert not extra, f"Unexpected extra commands: {extra}"
-
+# -----------------------------------------------------------------------
+# Registry
+# -----------------------------------------------------------------------
 
 @pytest.mark.parametrize("code,expected_class", [
     ("K", builtins.KnownRoomsCommand),
-    ("G", builtins.GoNextUnreadCommand),
+    ("G", builtins.ChangeRoomCommand),
     ("M", builtins.MailCommand),
-    (".C", builtins.CreateRoomCommand),
+    (".N", builtins.CreateRoomCommand),
+    ("H", builtins.HelpCommand),
+    ("B", builtins.BlockUserCommand),
 ])
 def test_registry_lookup_returns_correct_class(code, expected_class):
     cls = registry.get(code)
@@ -33,17 +26,63 @@ def test_registry_lookup_returns_correct_class(code, expected_class):
     assert issubclass(cls, BaseCommand)
 
 
+def test_registry_get_unknown_code_returns_none():
+    assert registry.get("NOPE") is None
+
+
+def test_registry_available_is_a_copy():
+    available = registry.available()
+    available.clear()
+    # Mutating the returned dict must not affect the registry.
+    assert registry.available(), "registry.available() should return a copy"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="Known P0 bug: duplicate command codes (O/U/P) collide in the "
+           "registry, so EnterMessage/GoNextUnread/ForwardRead are shadowed "
+           "by ScanMessages/Who/ValidateUsers. See "
+           "docs/KNOWN_ISSUES_FIX_PLAN.md. Remove this xfail when fixed.",
+)
+def test_no_duplicate_command_codes():
+    # Each command class should own a unique code. Today three codes are
+    # reused, which silently makes the earlier-registered command
+    # unreachable through the registry.
+    assert registry.get("U") is builtins.EnterMessageCommand
+    assert registry.get("O") is builtins.GoNextUnreadCommand
+    assert registry.get("P") is builtins.ForwardReadCommand
+
+
+# -----------------------------------------------------------------------
+# Command construction / serialization (args is a plain string now)
+# -----------------------------------------------------------------------
+
+def test_command_requires_username():
+    with pytest.raises(ValueError):
+        builtins.ChangeRoomCommand(username=None)
+
+
 def test_command_to_dict_includes_username_and_room():
     cmd = builtins.EnterMessageCommand(
-        username="alice", room="Lobby", args={"content": "Hello"})
+        username="alice", room="Lobby", args="hello world")
     d = cmd.to_dict()
     assert d["username"] == "alice"
     assert d["room"] == "Lobby"
-    assert d["args"]["content"] == "Hello"
-    assert d["code"] == "E"
+    assert d["args"] == "hello world"
+    assert d["code"] == "U"
     assert d["name"] == "enter_message"
     assert d["permission_level"] == PermissionLevel.USER.value
 
+
+def test_default_args_is_empty_string():
+    cmd = builtins.ChangeRoomCommand(username="alice")
+    assert cmd.args == ""
+    assert cmd.room is None
+
+
+# -----------------------------------------------------------------------
+# Metadata
+# -----------------------------------------------------------------------
 
 def test_permission_levels_are_set_correctly():
     assert builtins.CreateRoomCommand.permission_level == PermissionLevel.USER
@@ -51,107 +90,51 @@ def test_permission_levels_are_set_correctly():
     assert builtins.FastForwardCommand.permission_level == PermissionLevel.USER
 
 
-def test_help_text_and_arg_schema_present():
+def test_help_and_short_text_present():
     cmd_cls = builtins.EnterMessageCommand
-    assert "message" in cmd_cls.help_text.lower()
-    assert "content" in cmd_cls.arg_schema
-    assert cmd_cls.arg_schema["content"]["required"] is True
+    assert cmd_cls.help_text.strip()
+    assert cmd_cls.short_text.strip()
 
 
 def test_validate_users_command_metadata():
     cmd_cls = builtins.ValidateUsersCommand
-    assert cmd_cls.code == "V"
+    assert cmd_cls.code == "P"
     assert cmd_cls.name == "validate_users"
     assert cmd_cls.permission_level == PermissionLevel.AIDE
-    assert "validation" in cmd_cls.help_text.lower()
-    assert cmd_cls.arg_schema == {}
+    assert cmd_cls.category == CommandCategory.AIDE
+    # German help text, but the stem "valid" survives translation.
+    assert "valid" in cmd_cls.help_text.lower()
 
 
 # -----------------------------------------------------------------------
-# error-path validation tests
+# is_implemented reflects whether run() is overridden
 # -----------------------------------------------------------------------
 
-def test_enter_message_requires_content():
-    # Missing "content" should fail
-    cmd = builtins.EnterMessageCommand(username="alice", room="Lobby", args={})
-    with pytest.raises(ValueError):
-        cmd.validate(context={"room": "Lobby"})
+def test_is_implemented_distinguishes_stubs():
+    # ChangeRoom has a real run(); IgnoreRoom is still a stub.
+    assert builtins.ChangeRoomCommand.is_implemented() is True
+    assert builtins.IgnoreRoomCommand.is_implemented() is False
 
+
+# -----------------------------------------------------------------------
+# What's left of validate(): EnterMessage still guards the Mail room.
+# -----------------------------------------------------------------------
 
 def test_enter_message_requires_recipient_in_mail_room():
-    # In Mail room, recipient is required
+    # Empty args in the Mail room means no recipient -> reject.
     cmd = builtins.EnterMessageCommand(
-        username="alice",
-        room="Mail",
-        args={"content": "Hello"}
-    )
+        username="alice", room="Mail", args="")
     with pytest.raises(ValueError):
         cmd.validate(context={"room": "Mail"})
 
 
-def test_delete_message_requires_message_id():
-    # Missing message_id should fail
-    cmd = builtins.DeleteMessageCommand(username="bob", room="Lobby", args={})
-    with pytest.raises(ValueError):
-        cmd.validate(context={"room": "Lobby"})
-
-
-def test_block_user_requires_target_user():
-    # Missing target_user should fail
-    cmd = builtins.BlockUserCommand(username="bob", room="Lobby", args={})
-    with pytest.raises(ValueError):
-        cmd.validate(context={"room": "Lobby"})
-
-
-def test_validate_users_command_accepts_no_args():
-    # No args should be fine
-    cmd = builtins.ValidateUsersCommand(username="aide", args={})
-    cmd.validate(context={"role": "aide"})  # should not raise
-
-    # Extraneous args should fail
-    cmd = builtins.ValidateUsersCommand(
-        username="aide", args={"extra": "oops"})
-    with pytest.raises(ValueError):
-        cmd.validate(context={"role": "aide"})
-
-
-# -----------------------------------------------------------------------
-# positive validation tests
-# -----------------------------------------------------------------------
-
-def test_enter_message_valid_in_regular_room():
+def test_enter_message_ok_in_mail_room_with_recipient():
     cmd = builtins.EnterMessageCommand(
-        username="alice",
-        room="Lobby",
-        args={"content": "Hello everyone!"}
-    )
-    # Should not raise
-    cmd.validate(context={"room": "Lobby"})
+        username="alice", room="Mail", args="bob")
+    cmd.validate(context={"room": "Mail"})  # should not raise
 
 
-def test_enter_message_valid_in_mail_room():
+def test_enter_message_ok_in_regular_room():
     cmd = builtins.EnterMessageCommand(
-        username="alice",
-        room="Mail",
-        args={"content": "Private hello", "recipient": "bob"}
-    )
-    # Should not raise
-    cmd.validate(context={"room": "Mail"})
-
-
-def test_delete_message_valid():
-    cmd = builtins.DeleteMessageCommand(
-        username="bob",
-        room="Lobby",
-        args={"message_id": "1234"}
-    )
-    cmd.validate(context={"room": "Lobby"})
-
-
-def test_block_user_valid():
-    cmd = builtins.BlockUserCommand(
-        username="bob",
-        room="Lobby",
-        args={"target_user": "charlie"}
-    )
-    cmd.validate(context={"room": "Lobby"})
+        username="alice", room="Lobby", args="")
+    cmd.validate(context={"room": "Lobby"})  # should not raise

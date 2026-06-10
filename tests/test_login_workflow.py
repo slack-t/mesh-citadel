@@ -1,71 +1,61 @@
 import pytest
-import asyncio
-from unittest.mock import AsyncMock, MagicMock
 
+from citadel.auth.permissions import PermissionLevel
+from citadel.auth.passwords import generate_salt, hash_password
+from citadel.user.user import User, UserStatus
 from citadel.workflows.login import LoginWorkflow
-from citadel.session.state import WorkflowState
+from citadel.workflows.base import WorkflowContext, WorkflowState
 from citadel.transport.packets import ToUser
 
 
-@pytest.fixture
-def mock_processor(monkeypatch):
-    # Mock the auth handler
-    mock_auth = MagicMock()
-    mock_auth.authenticate = AsyncMock()
+async def _make_user(db, config, username, password):
+    salt = generate_salt()
+    await User.create(config, db, username, hash_password(password, salt),
+                      salt, username, UserStatus.ACTIVE)
+    user = User(db, username)
+    await user.load()
+    await user.set_permission_level(PermissionLevel.USER)
 
-    # Mock the session manager
-    mock_sessions = MagicMock()
-    mock_sessions.mark_username = MagicMock()
-    mock_sessions.mark_logged_in = MagicMock()
-    mock_sessions.clear_workflow = MagicMock()
-    mock_sessions.set_workflow = MagicMock()
 
-    # Attach to processor
-    processor = MagicMock()
-    processor.auth = mock_auth
-    processor.sessions = mock_sessions
-    processor.db = AsyncMock()
-    return processor
+def _context(session_mgr, db, config, step, data=None):
+    session_id = session_mgr.create_session()
+    wf_state = WorkflowState(kind="login", step=step, data=data or {})
+    session_mgr.set_workflow(session_id, wf_state)
+    return WorkflowContext(
+        session_id=session_id, db=db, config=config,
+        session_mgr=session_mgr, wf_state=wf_state,
+    )
 
 
 @pytest.mark.asyncio
-async def test_login_workflow_happy_path(mock_processor):
-    workflow = LoginWorkflow()
-    session_id = "session123"
-    wf_state = WorkflowState(kind="login", step=1, data={})
-
-    # Step 1: prompt for username
-    command = MagicMock()
-    command.name = None
-    command.text = ""
-    response = await workflow.handle(mock_processor, session_id, None, command, wf_state)
+async def test_login_step1_prompts_for_username(session_mgr, db, config):
+    ctx = _context(session_mgr, db, config, step=1)
+    response = await LoginWorkflow().handle(ctx, None)
     assert isinstance(response, ToUser)
     assert not response.is_error
+    assert response.hints.get("type") == "text"
+    assert response.hints.get("step") == 2
+
+
+@pytest.mark.asyncio
+async def test_login_step2_known_user_prompts_password(session_mgr, db, config):
+    await _make_user(db, config, "bob", "correct-password")
+    ctx = _context(session_mgr, db, config, step=2)
+    response = await LoginWorkflow().handle(ctx, "bob")
     assert not response.is_error
-    assert response.text == "Enter your username:"
-    assert 'type' in response.hints and response.hints['type'] == 'text'
+    assert response.hints.get("type") == "password"
+    assert response.hints.get("step") == 3
 
-    # Step 2: provide username
-    wf_state = WorkflowState(kind="login", step=2, data={})
-    command.text = "bob"
-    response = await workflow.handle(mock_processor, session_id, None, command, wf_state)
+
+@pytest.mark.asyncio
+async def test_login_step3_success(session_mgr, db, config):
+    await _make_user(db, config, "bob", "correct-password")
+    ctx = _context(session_mgr, db, config, step=3, data={"username": "bob"})
+    response = await LoginWorkflow().handle(ctx, "correct-password")
+
     assert not response.is_error
-    assert response.text == "Enter your password:"
-    assert 'type' in response.hints and response.hints['type'] == 'password'
-
-    # Step 3: provide password
-    wf_state = WorkflowState(kind="login", step=3, data={"username": "bob"})
-    command.text = "correct-password"
-    mock_user = MagicMock()
-    mock_user.username = "bob"
-    mock_processor.auth.authenticate.return_value = mock_user
-
-    response = await workflow.handle(mock_processor, session_id, None, command, wf_state)
-    assert not response.is_error
-    assert "Welcome, bob" in response.text
-
-    # Ensure session was marked
-    mock_processor.sessions.mark_username.assert_called_with(session_id, "bob")
-    mock_processor.sessions.mark_logged_in.assert_called_with(session_id)
-    mock_processor.sessions.clear_workflow.assert_called_with(session_id)
-
+    assert "bob" in response.text
+    # Session should now be logged in, bound to bob, with the workflow cleared.
+    assert session_mgr.get_username(ctx.session_id) == "bob"
+    assert session_mgr.is_logged_in(ctx.session_id) is True
+    assert session_mgr.get_workflow(ctx.session_id) is None

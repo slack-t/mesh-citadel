@@ -46,7 +46,7 @@ def test_missing_file_uses_defaults():
     reset_config_singleton()
     cfg = Config("nonexistent.yaml")
     assert cfg.bbs["system_name"] == "Mesh-Citadel"
-    assert cfg.transport["serial_port"] == "/dev/ttyUSB0"
+    assert cfg.transport["meshcore"]["serial_port"] == "/dev/ttyUSB0"
 
 
 def test_bad_yaml_format(temp_config_dir):

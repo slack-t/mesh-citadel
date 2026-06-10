@@ -119,7 +119,7 @@ async def test_help_menu_generation(setup_user_and_session):
     config = Config()
     processor = CommandProcessor(config, db, session_mgr)
     processor.sessions.mark_username(session_id, 'testuser')
-    processor.sessions.mark_logged_in(session_id)
+    await processor.sessions.mark_logged_in(session_id)
 
     # Create help command
     help_cmd = HelpCommand(username='testuser', args={})
@@ -134,10 +134,8 @@ async def test_help_menu_generation(setup_user_and_session):
 
     assert isinstance(response, ToUser)
     assert not response.is_error
-    assert "Common Commands:" in response.text
-
-    print(f"\nGenerated help menu:")
-    print(response.text)
+    # Category headers are localized; "Common" is now "Standard".
+    assert "Standard Kommandos:" in response.text
 
 
 @pytest.mark.asyncio
@@ -147,7 +145,7 @@ async def test_specific_command_help(setup_user_and_session):
     config = Config()
     processor = CommandProcessor(config, db, session_mgr)
     processor.sessions.mark_username(session_id, 'testuser')
-    processor.sessions.mark_logged_in(session_id)
+    await processor.sessions.mark_logged_in(session_id)
 
     # Test help for a specific implemented command
     help_cmd = HelpCommand(username='testuser', args={"command": "G"})
@@ -160,11 +158,10 @@ async def test_specific_command_help(setup_user_and_session):
 
     assert isinstance(response, ToUser)
     assert not response.is_error
+    # "G" is now ChangeRoomCommand ("Raum wechseln"). Detailed help renders
+    # as "<code> - <short_text>\n<help_text>".
     assert "G - " in response.text
-    assert "Go to the next room" in response.text
-
-    print(f"\nDetailed help for 'G' command:")
-    print(response.text)
+    assert "Raum wechseln" in response.text
 
 
 @pytest.mark.asyncio
@@ -174,10 +171,10 @@ async def test_unimplemented_command_help(setup_user_and_session):
     config = Config()
     processor = CommandProcessor(config, db, session_mgr)
     processor.sessions.mark_username(session_id, 'testuser')
-    processor.sessions.mark_logged_in(session_id)
+    await processor.sessions.mark_logged_in(session_id)
 
-    # Test help for an unimplemented command
-    help_cmd = HelpCommand(username='testuser', args={"command": "D"})
+    # "I" (ignore_room) is a USER-level command that is still a stub.
+    help_cmd = HelpCommand(username='testuser', args={"command": "I"})
     fromuser = FromUser(
         session_id=session_id,
         payload=help_cmd,
@@ -187,11 +184,8 @@ async def test_unimplemented_command_help(setup_user_and_session):
 
     assert isinstance(response, ToUser)
     assert not response.is_error
-    assert "D - " in response.text
-    assert "(Not yet implemented)" in response.text
-
-    print(f"\nHelp for unimplemented 'D' command:")
-    print(response.text)
+    assert "I - " in response.text
+    assert "(Noch nicht eingebaut)" in response.text
 
 
 @pytest.mark.asyncio
@@ -201,7 +195,7 @@ async def test_unknown_command_help(setup_user_and_session):
     config = Config()
     processor = CommandProcessor(config, db, session_mgr)
     processor.sessions.mark_username(session_id, 'testuser')
-    processor.sessions.mark_logged_in(session_id)
+    await processor.sessions.mark_logged_in(session_id)
 
     # Test help for unknown command
     help_cmd = HelpCommand(username='testuser', args={"command": "Z"})
@@ -215,7 +209,8 @@ async def test_unknown_command_help(setup_user_and_session):
     assert isinstance(response, ToUser)
     assert response.is_error
     assert response.error_code == "unknown_command"
-    assert "Unknown command: Z" in response.text
+    # Localized "unknown command" message still echoes the bad code.
+    assert "Z" in response.text
 
 
 @pytest.mark.asyncio
@@ -225,7 +220,7 @@ async def test_menu_command_works_same_as_help(setup_user_and_session):
     config = Config()
     processor = CommandProcessor(config, db, session_mgr)
     processor.sessions.mark_username(session_id, 'testuser')
-    processor.sessions.mark_logged_in(session_id)
+    await processor.sessions.mark_logged_in(session_id)
 
     # Test both commands with same args
     help_cmd = HelpCommand(username='testuser', args={})

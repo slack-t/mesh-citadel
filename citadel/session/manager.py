@@ -81,6 +81,7 @@ class SessionManager:
         return True  # session isn't registered
 
     async def expire_session(self, session_id: str) -> bool:
+        state = None
         if session_id in self.sessions:
             with self.lock:
                 state, _ = self.sessions[session_id]
