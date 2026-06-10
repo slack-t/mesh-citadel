@@ -1,7 +1,13 @@
-# Mesh-Citadel BBS (Die deutsche Slack-T Edition!)
+# Mesh-Citadel NG 🚀 (`mesh-citadel-ng`)
 
 **🚨 WICHTIG: Das hier ist ein Fork! 🚨**
-Dies ist der extrem aufgemotzte und eingedeutschte Fork von [taedryn/mesh-citadel](https://github.com/taedryn/mesh-citadel). Alles hier wurde frisch übersetzt und mit einer ordentlichen Prise Humor verfeinert.
+Dies ist `mesh-citadel-ng` – die "next generation" Weiterentwicklung des extrem aufgemotzten Forks von [taedryn/mesh-citadel](https://github.com/taedryn/mesh-citadel). Alles hier wurde frisch überarbeitet, internationalisiert (Standardsprache jetzt Englisch, Deutsch als Übersetzung) und mit einer ordentlichen Prise Humor verfeinert.
+
+## 🙌 Shoutout & Credits
+
+Dickes Dankeschön und alle Props an **[taedryn](https://github.com/taedryn)**, die/der das originale [mesh-citadel](https://github.com/taedryn/mesh-citadel) erschaffen hat – ohne diese geniale Grundlage gäb's dieses Projekt hier nicht. 🫶
+
+This project (`mesh-citadel-ng`) is a fork of and builds directly on the original **mesh-citadel by [taedryn](https://github.com/taedryn)**. Huge thanks and full credit to taedryn for creating the original — we're just standing on the shoulders of a giant. The original copyright and the [Forklift Certified License](LICENSE) are retained; per the license, the project was renamed to make clear this is a modified, independent continuation.
 
 Dieses Projekt baut ein BBS (Bulletin Board System) für MeshCore, das stark an das gute alte Citadel BBS aus den 80ern erinnert. Das Ding ist extrem leichtgewichtig und dafür gedacht, auf einem solarbetriebenen Raspberry Pi Zero und einem energiesparenden nRF52-basierten LoRa-Node zu laufen (mit der USB Companion Firmware via py-meshcore).
 
