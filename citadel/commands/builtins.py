@@ -106,7 +106,7 @@ async def read_messages(context, msg_ids):
 
 @register_command
 class GoNextUnreadCommand(BaseCommand):
-    code = "O"
+    code = "W"
     name = "go_next_unread"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -150,7 +150,7 @@ class GoNextUnreadCommand(BaseCommand):
 
 @register_command
 class EnterMessageCommand(BaseCommand):
-    code = "U"
+    code = "S"
     name = "enter_message"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -211,7 +211,7 @@ class ReverseReadCommand(BaseCommand):
 
 @register_command
 class ForwardReadCommand(BaseCommand):
-    code = "P"
+    code = "V"
     name = "forward_read"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER

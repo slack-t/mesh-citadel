@@ -16,6 +16,9 @@ from citadel.auth.permissions import PermissionLevel
     ("K", builtins.KnownRoomsCommand),
     ("G", builtins.ChangeRoomCommand),
     ("M", builtins.MailCommand),
+    ("S", builtins.EnterMessageCommand),
+    ("W", builtins.GoNextUnreadCommand),
+    ("V", builtins.ForwardReadCommand),
     (".N", builtins.CreateRoomCommand),
     ("H", builtins.HelpCommand),
     ("B", builtins.BlockUserCommand),
@@ -37,20 +40,13 @@ def test_registry_available_is_a_copy():
     assert registry.available(), "registry.available() should return a copy"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Known P0 bug: duplicate command codes (O/U/P) collide in the "
-           "registry, so EnterMessage/GoNextUnread/ForwardRead are shadowed "
-           "by ScanMessages/Who/ValidateUsers. See "
-           "docs/KNOWN_ISSUES_FIX_PLAN.md. Remove this xfail when fixed.",
-)
 def test_no_duplicate_command_codes():
-    # Each command class should own a unique code. Today three codes are
-    # reused, which silently makes the earlier-registered command
-    # unreachable through the registry.
-    assert registry.get("U") is builtins.EnterMessageCommand
-    assert registry.get("O") is builtins.GoNextUnreadCommand
-    assert registry.get("P") is builtins.ForwardReadCommand
+    assert registry.get("S") is builtins.EnterMessageCommand
+    assert registry.get("W") is builtins.GoNextUnreadCommand
+    assert registry.get("V") is builtins.ForwardReadCommand
+    assert registry.get("O") is builtins.WhoCommand
+    assert registry.get("U") is builtins.ScanMessagesCommand
+    assert registry.get("P") is builtins.ValidateUsersCommand
 
 
 # -----------------------------------------------------------------------
@@ -69,7 +65,7 @@ def test_command_to_dict_includes_username_and_room():
     assert d["username"] == "alice"
     assert d["room"] == "Lobby"
     assert d["args"] == "hello world"
-    assert d["code"] == "U"
+    assert d["code"] == "S"
     assert d["name"] == "enter_message"
     assert d["permission_level"] == PermissionLevel.USER.value
 
