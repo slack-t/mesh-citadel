@@ -1,7 +1,7 @@
 room:
   enter: "Willkommen im Raum '{room}'."
-  enter_unread: "Willkommen im Raum '{room}'. New messages are available in other rooms."
-  enter_no_unread: "Willkommen im Raum '{room}'. No rooms with unread messages found."
+  enter_unread: "Willkommen im Raum '{room}'. In anderen Räumen gibt's noch was zu lesen."
+  enter_no_unread: "Willkommen im Raum '{room}'. Nix mehr ungelesen, alles durch."
 
 notify:
   pending_validations:
