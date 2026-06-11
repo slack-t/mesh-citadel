@@ -1,0 +1,9 @@
+room:
+  enter: "Welcome to the '{room}' room."
+  enter_unread: "Welcome to '{room}'. There are unread messages elsewhere."
+  enter_no_unread: "Welcome to '{room}'. No rooms with unread messages."
+
+notify:
+  pending_validations:
+    one: "There is {count} pending validation."
+    other: "There are {count} pending validations."

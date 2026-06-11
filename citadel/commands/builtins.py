@@ -7,6 +7,7 @@ from citadel.commands.base import BaseCommand, CommandCategory
 from citadel.commands.registry import register_command
 from citadel.auth.permissions import PermissionLevel
 from citadel.commands.responses import MessageResponse
+from citadel.i18n import t
 from citadel.transport.packets import ToUser
 from citadel.auth.permissions import is_allowed
 from citadel.room.room import Room, SystemRoomIDs, RoomNotFoundError
@@ -106,7 +107,7 @@ async def read_messages(context, msg_ids):
 
 @register_command
 class GoNextUnreadCommand(BaseCommand):
-    code = "O"
+    code = "W"
     name = "go_next_unread"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -134,23 +135,23 @@ class GoNextUnreadCommand(BaseCommand):
             if lobby_has_unread:
                 return ToUser(
                     session_id=context.session_id,
-                    text=f"Willkommen im Raum '{new_room.name}'. New messages are available in other rooms."
+                    text=t("room.enter_unread", room=new_room.name)
                 )
             else:
                 return ToUser(
                     session_id=context.session_id,
-                    text=f"Willkommen im Raum '{new_room.name}'. No rooms with unread messages found."
+                    text=t("room.enter_no_unread", room=new_room.name)
                 )
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Willkommen im Raum '{new_room.name}'."
+            text=t("room.enter", room=new_room.name)
         )
 
 
 @register_command
 class EnterMessageCommand(BaseCommand):
-    code = "U"
+    code = "S"
     name = "enter_message"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
@@ -211,7 +212,7 @@ class ReverseReadCommand(BaseCommand):
 
 @register_command
 class ForwardReadCommand(BaseCommand):
-    code = "P"
+    code = "V"
     name = "forward_read"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
