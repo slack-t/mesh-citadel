@@ -356,7 +356,7 @@ class Room:
         return False
 
     async def get_next_unread_message(self, user: User) -> dict | None:
-        last_seen = self.get_last_unread_message_id(user)
+        last_seen = await self.get_last_unread_message_id(user)
 
         message_ids = await self.get_message_ids()
         if not message_ids:
@@ -507,11 +507,11 @@ class Room:
             raise PermissionDeniedError(
                 f"Cannot delete system room '{self.name}' (ID: {self.room_id})")
 
-        await Room.system_log(self.db, self.config, f"Room '{self.name}' was deleted")
+        await Room.system_log(self.db, self.config, f"Room '{self.name}' was deleted.")
 
         # Delete room and cascade
         await self.db.execute("DELETE FROM rooms WHERE id = ?", (self.room_id,))
-        await Room.initialize_room_order(db, config)
+        await Room.initialize_room_order(self.db, self.config)
         # TODO: remove linked messages from appropriate table
         # TODO: link previous and next room IDs together
 
