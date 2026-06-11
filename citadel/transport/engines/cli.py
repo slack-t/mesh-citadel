@@ -11,6 +11,7 @@ from citadel.config import Config
 from citadel.db.manager import DatabaseManager
 from citadel.transport.packets import FromUser, FromUserType, ToUser
 from citadel.commands.processor import CommandProcessor
+from citadel.i18n import resolve_locale
 from citadel.transport.parser import TextParser
 from citadel.session.manager import SessionManager
 from citadel.workflows.base import WorkflowContext, WorkflowState
@@ -140,12 +141,14 @@ class CommandRouter:
             return (None, None, None)
 
         handler = workflow_registry.get(wf_state.kind)
+        state = self.session_manager.get_session_state(session_id)
         context = WorkflowContext(
             session_id=session_id,
             config=self.config,
             db=self.db_manager,
             session_mgr=self.session_manager,
             wf_state=wf_state,
+            locale=resolve_locale(state, self.config),
         )
         touser_result = await handler.handle(context, command_line)
         return (touser_result, None, touser_result)
@@ -165,12 +168,14 @@ class CommandRouter:
         )
         self.session_manager.set_workflow(new_session_id, wf_state)
         handler = workflow_registry.get("login")
+        state = self.session_manager.get_session_state(new_session_id)
         context = WorkflowContext(
             session_id=new_session_id,
             config=self.config,
             db=self.db_manager,
             session_mgr=self.session_manager,
             wf_state=wf_state,
+            locale=resolve_locale(state, self.config),
         )
         touser_result = await handler.start(context)
         return (touser_result, new_session_id, touser_result)
@@ -422,4 +427,3 @@ class CLITransportEngine:
             except Exception:
                 pass
             log.info(f"CLI client disconnected: {client_id}")
-

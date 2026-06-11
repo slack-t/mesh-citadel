@@ -7,7 +7,6 @@ from citadel.commands.base import BaseCommand, CommandCategory
 from citadel.commands.registry import register_command
 from citadel.auth.permissions import PermissionLevel
 from citadel.commands.responses import MessageResponse
-from citadel.i18n import t
 from citadel.transport.packets import ToUser
 from citadel.auth.permissions import is_allowed
 from citadel.room.room import Room, SystemRoomIDs, RoomNotFoundError
@@ -135,17 +134,17 @@ class GoNextUnreadCommand(BaseCommand):
             if lobby_has_unread:
                 return ToUser(
                     session_id=context.session_id,
-                    text=t("room.enter_unread", room=new_room.name)
+                    text=context.t("room.enter_unread", room=new_room.name)
                 )
             else:
                 return ToUser(
                     session_id=context.session_id,
-                    text=t("room.enter_no_unread", room=new_room.name)
+                    text=context.t("room.enter_no_unread", room=new_room.name)
                 )
 
         return ToUser(
             session_id=context.session_id,
-            text=t("room.enter", room=new_room.name)
+            text=context.t("room.enter", room=new_room.name)
         )
 
 
@@ -183,7 +182,8 @@ class EnterMessageCommand(BaseCommand):
             db=context.db,
             config=context.config,
             session_mgr=context.session_mgr,
-            wf_state=wf_state
+            wf_state=wf_state,
+            locale=context.locale,
         )
 
         workflow = get_workflow("enter_message")
@@ -811,7 +811,8 @@ class ValidateUsersCommand(BaseCommand):
                 config=context.config,
                 db=context.db,
                 session_mgr=context.session_mgr,
-                wf_state=context.session_mgr.get_workflow(context.session_id)
+                wf_state=context.session_mgr.get_workflow(context.session_id),
+                locale=context.locale,
             )
             return await handler.start(workflow_context)
 
@@ -855,7 +856,8 @@ class CreateRoomCommand(BaseCommand):
                 config=context.config,
                 db=context.db,
                 session_mgr=context.session_mgr,
-                wf_state=context.session_mgr.get_workflow(context.session_id)
+                wf_state=context.session_mgr.get_workflow(context.session_id),
+                locale=context.locale,
             )
             return await handler.start(workflow_context)
 

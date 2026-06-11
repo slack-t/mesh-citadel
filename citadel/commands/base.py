@@ -24,6 +24,15 @@ class CommandContext:
     session_mgr: "SessionManager"
     msg_mgr: "MessageManager"
     session_id: str
+    locale: str = "de"
+
+    def t(self, key: str, **kwargs) -> str:
+        from citadel.i18n import _translator
+        return _translator.t(key, locale=self.locale, **kwargs)
+
+    def tn(self, key: str, count: int, **kwargs) -> str:
+        from citadel.i18n import _translator
+        return _translator.tn(key, count, locale=self.locale, **kwargs)
 
 
 class CommandCategory(IntEnum):

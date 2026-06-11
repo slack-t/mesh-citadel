@@ -192,13 +192,15 @@ class SessionManager:
             if wf_state:
                 from citadel.workflows.base import WorkflowContext
                 from citadel.workflows import registry as workflow_registry
+                from citadel.i18n import resolve_locale
 
                 context = WorkflowContext(
                     session_id=session_id,
                     config=self.config,
                     db=self.db,
                     session_mgr=self,
-                    wf_state=wf_state
+                    wf_state=wf_state,
+                    locale=resolve_locale(state, self.config),
                 )
 
                 handler = workflow_registry.get(wf_state.kind)
@@ -223,6 +225,7 @@ class SessionManager:
         from citadel.workflows.base import WorkflowState, WorkflowContext
         from citadel.workflows import registry as workflow_registry
         from citadel.transport.packets import ToUser
+        from citadel.i18n import resolve_locale
 
         # Use existing session or create new one
         if session_id:
@@ -248,7 +251,10 @@ class SessionManager:
                     config=config,
                     db=db,
                     session_mgr=self,
-                    wf_state=login_wf_state
+                    wf_state=login_wf_state,
+                    locale=resolve_locale(
+                        self.get_session_state(target_session_id), config
+                    ),
                 )
                 login_prompt = await login_handler.start(login_context)
                 login_prompt.session_id = target_session_id

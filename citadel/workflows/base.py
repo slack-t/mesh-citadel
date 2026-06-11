@@ -17,6 +17,15 @@ class WorkflowContext:
     config: "ConfigManager"
     session_mgr: "SessionManager"
     wf_state: "WorkflowState"
+    locale: str = "de"
+
+    def t(self, key: str, **kwargs) -> str:
+        from citadel.i18n import _translator
+        return _translator.t(key, locale=self.locale, **kwargs)
+
+    def tn(self, key: str, count: int, **kwargs) -> str:
+        from citadel.i18n import _translator
+        return _translator.tn(key, count, locale=self.locale, **kwargs)
 
 
 @dataclass
