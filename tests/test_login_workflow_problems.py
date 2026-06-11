@@ -12,7 +12,7 @@ def _context(session_mgr, db, config, step, data=None):
     session_mgr.set_workflow(session_id, wf_state)
     return WorkflowContext(
         session_id=session_id, db=db, config=config,
-        session_mgr=session_mgr, wf_state=wf_state,
+        session_mgr=session_mgr, wf_state=wf_state, locale="de",
     )
 
 

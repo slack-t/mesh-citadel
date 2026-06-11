@@ -82,6 +82,7 @@ class Config:
 
         self._raw = raw
 
+        self.system = raw["system"]
         self.bbs = raw["bbs"]
         self.auth = raw["auth"]
         self.transport = raw["transport"]
@@ -116,6 +117,7 @@ class Config:
 
         self._raw = new_raw
 
+        self.system = new_raw["system"]
         self.bbs = new_raw["bbs"]
         self.auth = new_raw["auth"]
         self.transport = new_raw["transport"]

@@ -15,6 +15,7 @@ import time
 import traceback
 
 from citadel.commands.processor import CommandProcessor
+from citadel.i18n import resolve_locale
 from citadel.transport.engines.meshcore.util import MessageDeduplicator, AdvertScheduler, WatchdogFeeder
 from citadel.transport.parser import TextParser
 from citadel.transport.engines.meshcore.contacts import ContactManager
@@ -371,18 +372,19 @@ class MeshCoreTransportEngine:
             self.session_mgr.set_workflow(session_id, wf_state)
 
             # Create workflow context
+            session_state = self.session_mgr.get_session_state(session_id)
             context = WorkflowContext(
                 session_id=session_id,
                 db=self.db,
                 config=self.config,
                 session_mgr=self.session_mgr,
-                wf_state=wf_state
+                wf_state=wf_state,
+                locale=resolve_locale(session_state, self.config),
             )
 
             # Get workflow handler from registry
             handler = workflow_registry.get("login")
             if handler:
-                session_state = self.session_mgr.get_session_state(session_id)
                 touser_result = await handler.start(context)
                 success = await self.protocol_handler.send_to_node(
                     session_state.node_id,

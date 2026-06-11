@@ -4,6 +4,7 @@ import logging
 
 from citadel.auth.permissions import is_allowed, permission_denied
 from citadel.commands.base import CommandContext
+from citadel.i18n import resolve_locale
 from citadel.message.manager import MessageManager
 from citadel.room.room import Room, SystemRoomIDs
 from citadel.session.manager import SessionManager
@@ -53,6 +54,7 @@ class CommandProcessor:
             )
 
         self.sessions.touch_session(session_id)
+        locale = resolve_locale(state, self.config)
 
         # 3. Handle workflow if active
         if wf_state:
@@ -72,7 +74,8 @@ class CommandProcessor:
                     db=self.db,
                     config=self.config,
                     session_mgr=self.sessions,
-                    wf_state=wf_state
+                    wf_state=wf_state,
+                    locale=locale,
                 )
                 return await handler.handle(context, packet.payload)
             else:
@@ -122,6 +125,7 @@ class CommandProcessor:
                 session_mgr=self.sessions,
                 msg_mgr=self.msg_mgr,
                 session_id=session_id,
+                locale=locale,
             )
             result = await command.run(context)
             return result
