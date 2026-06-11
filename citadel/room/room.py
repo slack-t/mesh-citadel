@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import logging
 
 from citadel.auth.permissions import PermissionLevel
+from citadel.i18n import t
 
 log = logging.getLogger(__name__)
 
@@ -38,16 +39,18 @@ class Room:
     _room_order = []
 
     @classmethod
-    def get_system_room_names(cls, config):
+    def get_system_room_names(cls, config, locale: str = "de"):
         """Get system room names from config with fallback defaults."""
+        from citadel.i18n import t
+
         room_names = config.bbs.get('room_names', {})
         return {
-            SystemRoomIDs.LOBBY_ID: room_names.get('lobby', 'Lobby'),
-            SystemRoomIDs.MAIL_ID: room_names.get('mail', 'Mail'),
-            SystemRoomIDs.AIDES_ID: room_names.get('aides', 'Aides'),
-            SystemRoomIDs.SYSOP_ID: room_names.get('sysop', 'Sysop'),
-            SystemRoomIDs.SYSTEM_ID: room_names.get('system', 'System'),
-            SystemRoomIDs.TWIT_ID: room_names.get('twit', 'Purgatory'),
+            SystemRoomIDs.LOBBY_ID: room_names.get('lobby') or t("bbs.room_names.lobby", locale=locale),
+            SystemRoomIDs.MAIL_ID: room_names.get('mail') or t("bbs.room_names.mail", locale=locale),
+            SystemRoomIDs.AIDES_ID: room_names.get('aides') or t("bbs.room_names.aides", locale=locale),
+            SystemRoomIDs.SYSOP_ID: room_names.get('sysop') or t("bbs.room_names.sysop", locale=locale),
+            SystemRoomIDs.SYSTEM_ID: room_names.get('system') or t("bbs.room_names.system", locale=locale),
+            SystemRoomIDs.TWIT_ID: room_names.get('twit') or t("bbs.room_names.twit", locale=locale),
         }
 
     def __init__(self, db, config, identifier: int | str):
@@ -498,7 +501,11 @@ class Room:
 
         await cls.initialize_room_order(db, config)
         log.info(f"New room {name} created with ID {new_id} by {creator}")
-        await cls.system_log(db, config, f"New room {name} created by {creator}")
+        await cls.system_log(
+            db,
+            config,
+            t("system_log.room_created", name=name, creator=creator),
+        )
         return new_id
 
     async def delete_room(self, sys_user: str):
@@ -507,7 +514,11 @@ class Room:
             raise PermissionDeniedError(
                 f"Cannot delete system room '{self.name}' (ID: {self.room_id})")
 
-        await Room.system_log(self.db, self.config, f"Room '{self.name}' was deleted.")
+        await Room.system_log(
+            self.db,
+            self.config,
+            t("system_log.room_deleted", name=self.name),
+        )
 
         # Delete room and cascade
         await self.db.execute("DELETE FROM rooms WHERE id = ?", (self.room_id,))

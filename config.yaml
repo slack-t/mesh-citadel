@@ -32,6 +32,10 @@ bbs:
     - "unverified"
   registration:
     terms_required: true
+    # Plain string (current) or per-locale dict:
+    # terms:
+    #   en: "To register, agree to these conditions:\n..."
+    #   de: "Um dich zu registrieren, stimme diesen Bedingungen zu:\n..."
     terms: "To register, agree to these conditions:\n
   1. Bigotry or hatred are not tolerated\n
   2. Be kind; assume best intent\n
@@ -47,6 +51,11 @@ auth:
   max_username_length: 32
   password_cache_duration: 14 # days
   recovery_questions:
+    # Plain list (current) or per-locale dict:
+    # en:
+    #   - "What is your favorite color?"
+    # de:
+    #   - "Was ist deine Lieblingsfarbe?"
     - "What is your favorite color?"
     - "What was your first pet's name?"
     - "Who was your favorite teacher?"

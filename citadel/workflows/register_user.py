@@ -6,6 +6,7 @@ import string
 
 from citadel.auth.passwords import generate_salt, hash_password
 from citadel.auth.permissions import PermissionLevel
+from citadel.i18n import get_localized_config, t
 from citadel.room.room import Room
 from citadel.transport.packets import ToUser
 from citadel.user.user import User, UserStatus
@@ -162,7 +163,12 @@ class RegisterUserWorkflow(Workflow):
             try:
                 terms_req = context.config.bbs["registration"]["terms_required"]
                 if terms_req:
-                    terms = context.config.bbs["registration"]["terms"]
+                    raw_terms = context.config.bbs["registration"].get("terms", "")
+                    terms = get_localized_config(
+                        raw_terms,
+                        locale=context.locale,
+                        fallback="",
+                    )
                     context.session_mgr.set_workflow(
                         context.session_id,
                         WorkflowState(kind=self.kind, step=4, data=data)
@@ -227,7 +233,12 @@ class RegisterUserWorkflow(Workflow):
                 )
 
                 attempts_left = 3 - reject_count
-                terms = context.config.bbs["registration"]["terms"]
+                raw_terms = context.config.bbs["registration"].get("terms", "")
+                terms = get_localized_config(
+                    raw_terms,
+                    locale=context.locale,
+                    fallback="",
+                )
                 return ToUser(
                     session_id=context.session_id,
                     text=context.t(
@@ -311,8 +322,15 @@ class RegisterUserWorkflow(Workflow):
                 await context.session_mgr.mark_logged_in(context.session_id)
 
             context.session_mgr.clear_workflow(context.session_id)
-            await Room.system_log(db, context.config,
-                f"New user {data['display_name']} ({username}) registered")
+            await Room.system_log(
+                db,
+                context.config,
+                t(
+                    "system_log.user_registered",
+                    display_name=data["display_name"],
+                    username=username,
+                ),
+            )
             return ToUser(
                 session_id=context.session_id,
                 text=context.t("register.success", step=step_num)

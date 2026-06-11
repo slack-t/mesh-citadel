@@ -210,7 +210,7 @@ async def test_room_deletion_logs_event(db, config, setup_rooms, setup_users):
         WHERE rm.room_id = ?
     """, (SystemRoomIDs.SYSTEM_ID,))
 
-    assert any("Room 'Test Room' was deleted." in msg[0] for msg in messages)
+    assert any("Raum 'Test Room' wurde gelöscht" in msg[0] for msg in messages)
 
 
 @pytest.mark.asyncio

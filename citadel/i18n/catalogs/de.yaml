@@ -3,6 +3,23 @@ room:
   enter_unread: "Willkommen im Raum '{room}'. In anderen Räumen gibt's noch was zu lesen."
   enter_no_unread: "Willkommen im Raum '{room}'. Nix mehr ungelesen, alles durch."
 
+bbs:
+  welcome_default: "Moin! Willkommen in der {name} (Beste wo gibt). Einloggen oder 'new' für Registrierung."
+  room_names:
+    lobby: "Lobby"
+    mail: "Mail"
+    aides: "Aides"
+    sysop: "Sysop"
+    system: "System"
+    twit: "Purgatory"
+
+system_log:
+  room_created: "Neuer Raum '{name}' von {creator} erstellt"
+  room_deleted: "Raum '{name}' wurde gelöscht"
+  user_validated: "User '{username}' von '{validator}' freigegeben"
+  user_rejected: "User '{username}' von '{validator}' abgelehnt"
+  user_registered: "Neuer User '{display_name}' ({username}) registriert"
+
 messages:
   empty_room: "Gähn... absolut tote Hose (Keine Nachrichten)"
   no_new: "Nix Neues hier, Digger."

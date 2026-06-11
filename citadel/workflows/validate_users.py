@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from citadel.auth.permissions import PermissionLevel
+from citadel.i18n import t
 from citadel.room.room import Room
 from citadel.transport.packets import ToUser
 from citadel.user.user import User, UserStatus
@@ -132,8 +133,15 @@ class ValidateUsersWorkflow(Workflow):
             validator_username = validator_state.username if validator_state else "unknown"
             log.info(
                 f"User '{username}' validated by '{validator_username}' - promoted to USER level")
-            await Room.system_log(context.db, context.config, 
-                f"User {username} validated by {validator_username}")
+            await Room.system_log(
+                context.db,
+                context.config,
+                t(
+                    "system_log.user_validated",
+                    username=username,
+                    validator=validator_username,
+                ),
+            )
 
             # Move to next user
             await self._advance_to_next_user(context)
@@ -178,8 +186,15 @@ class ValidateUsersWorkflow(Workflow):
             validator_state = context.session_mgr.get_session_state(
                 context.session_id)
             validator_username = validator_state.username if validator_state else "unknown"
-            await Room.system_log(context.db, context.config,
-                f"User {username} rejected by {validator_username}")
+            await Room.system_log(
+                context.db,
+                context.config,
+                t(
+                    "system_log.user_rejected",
+                    username=username,
+                    validator=validator_username,
+                ),
+            )
             log.info(
                 f"User '{username}' rejected by '{validator_username}' - account deleted")
 

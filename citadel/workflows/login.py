@@ -1,6 +1,7 @@
 import logging
 
 from citadel.auth.passwords import authenticate
+from citadel.i18n import get_localized_config, t
 from citadel.room.room import Room, SystemRoomIDs
 from citadel.transport.packets import ToUser
 from citadel.user.user import User
@@ -21,8 +22,21 @@ class LoginWorkflow(Workflow):
         if step == 1:
             # Prompt for username (called on workflow start or with command=None)
             # Include welcome message at start of login process
-            welcome = context.config.bbs.get(
-                "welcome_message", "Moin! Willkommen in der Mesh-Citadel (Beste wo gibt).")
+            system = getattr(context.config, "system", {})
+            system_name = context.config.bbs.get("name") or system.get(
+                "name",
+                "Mesh-Citadel",
+            )
+            raw_welcome = context.config.bbs.get("welcome_message")
+            welcome = get_localized_config(
+                raw_welcome,
+                locale=context.locale,
+                fallback=t(
+                    "bbs.welcome_default",
+                    locale=context.locale,
+                    name=system_name,
+                ),
+            )
             context.session_mgr.set_workflow(
                 context.session_id,
                 WorkflowState(kind=self.kind, step=2, data=data)

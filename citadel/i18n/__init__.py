@@ -17,4 +17,14 @@ def resolve_locale(state, config) -> str:
     return "de"
 
 
-__all__ = ["Translator", "resolve_locale", "t", "tn"]
+def get_localized_config(value, locale: str, fallback: str = "") -> str:
+    """Resolve a config value that is either a plain string or a locale map.
+
+    Priority: exact locale match -> 'en' fallback -> fallback arg.
+    """
+    if isinstance(value, dict):
+        return value.get(locale) or value.get("en") or fallback
+    return value or fallback
+
+
+__all__ = ["Translator", "get_localized_config", "resolve_locale", "t", "tn"]
