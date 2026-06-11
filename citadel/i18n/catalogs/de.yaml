@@ -1,0 +1,9 @@
+room:
+  enter: "Willkommen im Raum '{room}'."
+  enter_unread: "Willkommen im Raum '{room}'. New messages are available in other rooms."
+  enter_no_unread: "Willkommen im Raum '{room}'. No rooms with unread messages found."
+
+notify:
+  pending_validations:
+    one: "{count} User wartet auf Freigabe."
+    other: "{count} User warten auf Freigabe."
