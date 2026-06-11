@@ -1,61 +1,22 @@
-# tests/commands/test_dot_commands.py
-
-import pytest
+# tests/test_dot_commands.py
 
 from citadel.commands import builtins
+from citadel.commands.base import CommandCategory
 from citadel.auth.permissions import PermissionLevel
 
 
-def test_create_room_requires_room_name():
-    cmd = builtins.CreateRoomCommand(username="aide", args={})
-    with pytest.raises(ValueError):
-        cmd.validate(context={"role": "aide"})
+# The old per-command arg_schema validation system has been retired:
+# validate() is now a permissive no-op (commands check their own args inside
+# run()), and the dot-command codes were renamed. These tests pin down the
+# current metadata and implementation status instead.
 
 
-def test_create_room_valid():
-    cmd = builtins.CreateRoomCommand(
-        username="aide",
-        args={"room": "NewRoom", "description": "A test room"}
-    )
-    cmd.validate(context={"role": "aide"})
-
-
-def test_edit_room_requires_room_and_attributes():
-    cmd = builtins.EditRoomCommand(username="sysop", args={})
-    with pytest.raises(ValueError):
-        cmd.validate(context={"role": "sysop"})
-
-
-def test_edit_room_valid():
-    cmd = builtins.EditRoomCommand(
-        username="sysop",
-        args={"room": "Lobby", "attributes": {"topic": "New topic"}}
-    )
-    cmd.validate(context={"role": "sysop"})
-
-
-def test_edit_user_requires_target_and_attributes():
-    cmd = builtins.EditUserCommand(username="sysop", args={})
-    with pytest.raises(ValueError):
-        cmd.validate(context={"role": "sysop"})
-
-
-def test_edit_user_valid():
-    cmd = builtins.EditUserCommand(
-        username="sysop",
-        args={"target_user": "alice", "attributes": {"permission": "aide"}}
-    )
-    cmd.validate(context={"role": "sysop"})
-
-
-def test_fast_forward_has_no_args():
-    cmd = builtins.FastForwardCommand(username="bob", args={})
-    cmd.validate(context={"room": "Lobby"})  # should not raise
-
-    # If args are provided, it should fail
-    cmd = builtins.FastForwardCommand(username="bob", args={"extra": "oops"})
-    with pytest.raises(ValueError):
-        cmd.validate(context={"room": "Lobby"})
+def test_dot_command_codes():
+    assert builtins.CreateRoomCommand.code == ".N"
+    assert builtins.EditRoomCommand.code == ".RR"
+    assert builtins.EditUserCommand.code == ".UB"
+    assert builtins.FastForwardCommand.code == ".S"
+    assert builtins.KillRoomCommand.code == ".KR"
 
 
 def test_permissions_for_dot_commands():
@@ -63,3 +24,28 @@ def test_permissions_for_dot_commands():
     assert builtins.EditRoomCommand.permission_level == PermissionLevel.SYSOP
     assert builtins.EditUserCommand.permission_level == PermissionLevel.SYSOP
     assert builtins.FastForwardCommand.permission_level == PermissionLevel.USER
+    assert builtins.KillRoomCommand.permission_level == PermissionLevel.SYSOP
+
+
+def test_dot_command_categories():
+    assert builtins.CreateRoomCommand.category == CommandCategory.UNUSUAL
+    assert builtins.EditRoomCommand.category == CommandCategory.SYSOP
+    assert builtins.EditUserCommand.category == CommandCategory.SYSOP
+    assert builtins.KillRoomCommand.category == CommandCategory.SYSOP
+
+
+def test_implemented_dot_commands():
+    # CreateRoom and KillRoom have real run() methods; the editors are stubs.
+    assert builtins.CreateRoomCommand.is_implemented() is True
+    assert builtins.KillRoomCommand.is_implemented() is True
+    assert builtins.EditRoomCommand.is_implemented() is False
+    assert builtins.EditUserCommand.is_implemented() is False
+    assert builtins.FastForwardCommand.is_implemented() is False
+
+
+def test_validate_is_permissive_noop():
+    # validate() no longer enforces an argument schema for these commands.
+    builtins.CreateRoomCommand(username="aide", args="").validate(context={})
+    builtins.EditRoomCommand(username="sysop", args="").validate(context={})
+    builtins.EditUserCommand(username="sysop", args="").validate(context={})
+    builtins.FastForwardCommand(username="bob", args="").validate(context={})

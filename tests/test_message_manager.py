@@ -27,6 +27,7 @@ class DummyConfig:
                 'system': 'System'
             }
         }
+        self.transport = {'meshcore': {'max_packet_size': 150}}
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -92,10 +93,12 @@ async def test_blocked_message(msg_mgr, db):
 
 @pytest.mark.asyncio
 async def test_delete_message(msg_mgr, db):
+    user = User(db, "bob")
+    await user.load()
     msg_id = await msg_mgr.post_message("alice", "Temporary message")
     del_result = await msg_mgr.delete_message(msg_id)
     assert del_result is True
-    get_result = await msg_mgr.get_message(msg_id)
+    get_result = await msg_mgr.get_message(msg_id, recipient_user=user)
     assert get_result is None
 
 
@@ -107,7 +110,10 @@ async def test_get_messages_batch(msg_mgr, db):
     ]
     user = User(db, "bob")
     await user.load()
-    messages = await msg_mgr.get_messages(ids, recipient_user=user)
+    messages = [
+        await msg_mgr.get_message(msg_id, recipient_user=user)
+        for msg_id in ids
+    ]
 
     assert len(messages) == 3
     assert all(msg["sender"] == "alice" for msg in messages)
@@ -120,12 +126,12 @@ async def test_get_messages_batch(msg_mgr, db):
 async def test_message_summary_respects_packet_limit(msg_mgr, db):
     long_text = "X" * 500
     msg_id = await msg_mgr.post_message("alice", long_text)
-    summary = await msg_mgr.get_message_summary(msg_id)
+    user = User(db, "bob")
+    await user.load()
+    summary = await msg_mgr.get_message_summary(msg_id, recipient_user=user)
 
-    display_name = "Alice"
-    timestamp_len = len(datetime.now(UTC).isoformat())
-    reserved = len(display_name) + timestamp_len
-    assert len(summary) <= 184 - reserved
+    # get_message_summary truncates to the configured max_packet_size.
+    assert len(summary) <= 150
 
 
 @pytest.mark.asyncio

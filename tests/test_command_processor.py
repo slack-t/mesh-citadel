@@ -1,18 +1,13 @@
-import tempfile
-import os
 import pytest
 import pytest_asyncio
 
 from citadel.auth.permissions import PermissionLevel
-from citadel.auth.permissions import is_allowed
-from citadel.config import Config
 from citadel.commands.base import BaseCommand
 from citadel.commands.processor import CommandProcessor
-from citadel.commands.responses import CommandResponse, MessageResponse, ErrorResponse
 from citadel.db.manager import DatabaseManager
 from citadel.db.initializer import initialize_database
 from citadel.session.manager import SessionManager
-from citadel.session.state import SessionState, WorkflowState
+from citadel.workflows.base import WorkflowState
 from citadel.transport.packets import FromUser, ToUser, FromUserType
 from citadel.user.user import User
 from citadel.workflows.registry import register
@@ -25,25 +20,15 @@ class DummyCommand(BaseCommand):
 
     async def run(self, context):
         if self.name == "quit":
-            context.session_mgr.expire_session(context.session_id)
-            return ToUser(session_id=None, text="Goodbye!")
+            await context.session_mgr.expire_session(context.session_id)
+            return ToUser(session_id=context.session_id, text="Goodbye!")
         return ToUser(
             session_id=context.session_id,
             text=f"Dummy {self.name} command"
         )
 
 
-@pytest.fixture
-def config():
-    path = tempfile.NamedTemporaryFile(delete=False)
-    local_config = Config()
-    local_config.database['db_path'] = path.name
-
-    yield local_config
-
-    os.unlink(path.name)
-
-
+# `config` comes from tests/conftest.py (DummyConfig + temp DB path).
 @pytest_asyncio.fixture
 async def db(config):
     DatabaseManager._instance = None
@@ -52,20 +37,23 @@ async def db(config):
     await initialize_database(db_mgr, config)
 
     await User.create(config, db_mgr, "alice", "hash", "salt", "")
-    alice = User(db_mgr, 'alice')
+    alice = User(db_mgr, "alice")
     await alice.load()
     await alice.set_permission_level(PermissionLevel.USER)
 
     yield db_mgr
 
     await db_mgr.shutdown()
+    DatabaseManager._instance = None
 
 
 @pytest.fixture
 def session_mgr(config, db):
     mgr = SessionManager(config, db)
-    # assume you have a sync helper for tests
-    session_id = mgr.create_session("alice")
+    session_id = mgr.create_session()
+    mgr.mark_username(session_id, "alice")
+    # Mark logged in directly (mark_logged_in is async; set the flag here).
+    mgr.get_session_state(session_id).logged_in = True
     return mgr, session_id
 
 
@@ -73,12 +61,12 @@ def session_mgr(config, db):
 def processor(config, db, session_mgr, monkeypatch):
     mgr, session_id = session_mgr
     proc = CommandProcessor(config, db, mgr)
-    proc.sessions.mark_logged_in(session_id)
 
-    # Patch User.load to always set permission_level high enough
-    # so we're testing commands, not permissions
-    async def fake_load(self):
+    # Patch User.load to grant SYSOP, so we test command routing, not perms.
+    async def fake_load(self, force=False):
         self._permission_level = PermissionLevel.SYSOP
+        self._status = "active"
+        self._display_name = self.username
         self._loaded = True
     monkeypatch.setattr("citadel.user.user.User.load", fake_load)
 
@@ -101,11 +89,10 @@ async def test_invalid_session(processor):
     assert resp.is_error
     assert resp.error_code == "invalid_session"
 
+
 # ------------------------------------------------------------
 # Inline handler
 # ------------------------------------------------------------
-
-
 @pytest.mark.asyncio
 async def test_quit_expires_session(processor, session_mgr):
     mgr, session_id = session_mgr
@@ -120,11 +107,10 @@ async def test_quit_expires_session(processor, session_mgr):
     assert resp.text == "Goodbye!"
     assert mgr.get_session_state(session_id) is None
 
-# ------------------------------------------------------------
-# Unknown command
-# ------------------------------------------------------------
 
-
+# ------------------------------------------------------------
+# Unknown command -> permission denied (no ACTION_REQUIREMENTS entry)
+# ------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_unknown_command(processor, session_mgr):
     mgr, session_id = session_mgr
@@ -139,27 +125,23 @@ async def test_unknown_command(processor, session_mgr):
     assert resp.is_error
     assert resp.error_code == "permission_denied"
 
+
 # ------------------------------------------------------------
 # Workflow delegation
 # ------------------------------------------------------------
-
-
 @pytest.mark.asyncio
-async def test_workflow_delegation(processor, session_mgr, monkeypatch):
-    # note that this workflow isn't cleaned up, so remove it from
-    # registry.all_workflows if you need to add another workflow named
-    # dummy
+async def test_workflow_delegation(processor, session_mgr):
+    # Registered globally; persists in the registry for the rest of the run.
     @register
     class DummyWorkflow:
         kind = "dummy"
 
-        async def handle(self, processor, session_id, state, command, wf):
-            return ToUser(session_id=session_id, text="Handled by dummy workflow")
+        async def handle(self, context, command):
+            return ToUser(session_id=context.session_id,
+                          text="Handled by dummy workflow")
 
     mgr, session_id = session_mgr
-    state = mgr.get_session_state(session_id)
-    wf = WorkflowState(kind="dummy")
-    mgr.set_workflow(session_id, wf)
+    mgr.set_workflow(session_id, WorkflowState(kind="dummy"))
 
     fromuser = FromUser(
         session_id=session_id,

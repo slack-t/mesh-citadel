@@ -133,7 +133,10 @@ async def test_go_to_next_room_with_unread(db, config, setup_rooms, setup_users)
     user = User(db, "user")
     await user.load()
 
-    # Simulate unread messages in room 2
+    # Simulate unread messages in room 2. The message row itself must exist:
+    # has_unread_messages() runs each candidate through the privacy filter,
+    # which loads the actual message.
+    await db.execute("INSERT INTO messages (id, sender, recipient, content, timestamp) VALUES (101, 'user', NULL, 'unread!', '2025-09-18T21:00:00Z')")
     await db.execute("INSERT INTO room_messages (room_id, message_id, timestamp) VALUES (2, 101, '2025-09-18T21:00:00Z')")
     await db.execute("INSERT INTO user_room_state (username, room_id, last_seen_message_id) VALUES ('user', 2, NULL)")
 
@@ -212,11 +215,10 @@ async def test_room_deletion_logs_event(db, config, setup_rooms, setup_users):
 
 @pytest.mark.asyncio
 async def test_get_id_by_name(db, config, setup_rooms):
-    room = Room(db, config, 1)
-    assert await room.get_id_by_name("Lobby") == 1
-    assert await room.get_id_by_name("lobby") == 1
+    assert await Room.get_id_by_name(db, "Lobby") == 1
+    assert await Room.get_id_by_name(db, "lobby") == 1
     with pytest.raises(RoomNotFoundError):
-        await room.get_id_by_name("Nonexistent")
+        await Room.get_id_by_name(db, "Nonexistent")
 
 
 @pytest.mark.asyncio
