@@ -18,9 +18,8 @@ class ValidateUsersWorkflow(Workflow):
 
     async def start(self, context):
         """Start validation workflow - show commands once and first user."""
-        intro_text = "User Validierung\n\n"
         user_info = await self._show_current_user(context)
-        user_info.text = intro_text + user_info.text
+        user_info.text = context.t("validate_users.start_prefix") + user_info.text
         return user_info
 
     async def handle(self, context, command):
@@ -36,19 +35,19 @@ class ValidateUsersWorkflow(Workflow):
             context.session_mgr.clear_workflow(context.session_id)
             return ToUser(
                 session_id=context.session_id,
-                text="Validierung beendet. Feierabend!"
+                text=context.t("validate_users.quit")
             )
         else:
             return ToUser(
                 session_id=context.session_id,
-                text="Hä? Was? Benutze A/R/S/Q.",
+                text=context.t("validate_users.invalid_command"),
                 is_error=True,
                 error_code="invalid_command"
             )
 
     async def _show_current_user(self, context):
         """Show current user details concisely."""
-        commands_text = "A=freigeben R=ablehnen S=überspringen Q=abhauen"
+        commands_text = context.t("validate_users.commands")
         data = context.wf_state.data
         pending_users = data.get("pending_users", [])
         current_index = data.get("current_index", 0)
@@ -57,7 +56,7 @@ class ValidateUsersWorkflow(Workflow):
             context.session_mgr.clear_workflow(context.session_id)
             return ToUser(
                 session_id=context.session_id,
-                text="Alle User abgearbeitet! High Five!"
+                text=context.t("validate_users.all_done")
             )
 
         username = pending_users[current_index]
@@ -91,16 +90,18 @@ class ValidateUsersWorkflow(Workflow):
 
         submitted_at, intro_text = validation_info[0]
         if not intro_text or intro_text.strip() == "":
-            intro_text = "Keine Infos angegeben."
+            intro_text = context.t("validate_users.no_intro")
 
-        text = f"""User {current_index + 1}/{len(pending_users)}
-{username} ({user.display_name})
-Eingereicht: {submitted_at}
-
-Infos:
-{intro_text}
-
-{commands_text}"""
+        text = context.t(
+            "validate_users.user_card",
+            index=current_index + 1,
+            total=len(pending_users),
+            username=username,
+            display_name=user.display_name,
+            submitted_at=submitted_at,
+            intro=intro_text,
+            commands=commands_text,
+        )
 
         return ToUser(
             session_id=context.session_id,
@@ -137,14 +138,21 @@ Infos:
             # Move to next user
             await self._advance_to_next_user(context)
             next_user = await self._show_current_user(context)
-            next_user.text = f"'{username}' freigegeben!\n\n" + next_user.text
+            next_user.text = context.t(
+                "validate_users.approved_prefix",
+                username=username,
+            ) + next_user.text
             return next_user
 
         except Exception as e:
             log.error(f"Failed to approve '{username}': {e}")
             return ToUser(
                 session_id=context.session_id,
-                text=f"Fehler beim Freigeben von '{username}': {e}",
+                text=context.t(
+                    "validate_users.approve_error",
+                    username=username,
+                    error=e,
+                ),
                 is_error=True
             )
 
@@ -178,14 +186,21 @@ Infos:
             # Move to next user
             await self._advance_to_next_user(context)
             next_user = await self._show_current_user(context)
-            next_user.text = f"'{username}' abgelehnt.\n\n" + next_user.text
+            next_user.text = context.t(
+                "validate_users.rejected_prefix",
+                username=username,
+            ) + next_user.text
             return next_user
 
         except Exception as e:
             log.error(f"Failed to reject '{username}': {e}")
             return ToUser(
                 session_id=context.session_id,
-                text=f"Fehler beim Ablehnen von '{username}': {e}",
+                text=context.t(
+                    "validate_users.reject_error",
+                    username=username,
+                    error=e,
+                ),
                 is_error=True
             )
 

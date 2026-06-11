@@ -4,7 +4,7 @@ import logging
 
 from citadel.auth.permissions import is_allowed, permission_denied
 from citadel.commands.base import CommandContext
-from citadel.i18n import resolve_locale
+from citadel.i18n import resolve_locale, t
 from citadel.message.manager import MessageManager
 from citadel.room.room import Room, SystemRoomIDs
 from citadel.session.manager import SessionManager
@@ -41,14 +41,14 @@ class CommandProcessor:
         if not state:
             return ToUser(
                 session_id=session_id,
-                text="Session abgelaufen oder kaputt.",
+                text=t("errors.session_invalid"),
                 is_error=True,
                 error_code="invalid_session"
             )
         if not wf_state and not state.logged_in:
             return ToUser(
                 session_id=session_id,
-                text="Du musst dich einloggen, Digger.",
+                text=t("errors.not_logged_in"),
                 is_error=True,
                 error_code="not_logged_in"
             )
@@ -62,7 +62,7 @@ class CommandProcessor:
             if not handler:
                 return ToUser(
                     session_id=session_id,
-                    text=f"Kein Plan von diesem Workflow: {wf_state.kind}",
+                    text=t("errors.unknown_workflow", locale=locale, kind=wf_state.kind),
                     is_error=True,
                     error_code="unknown_workflow"
                 )
@@ -87,7 +87,7 @@ class CommandProcessor:
                 else:
                     return ToUser(
                         session_id=session_id,
-                        text="Kann keine Befehle ausführen, während du was anderes machst. Tippe 'cancel' zum Abbrechen.",
+                        text=t("errors.workflow_active", locale=locale),
                         is_error=True,
                         error_code="workflow_active"
                     )
@@ -96,7 +96,7 @@ class CommandProcessor:
         if packet.payload_type.value != "command":
             return ToUser(
                 session_id=session_id,
-                text="Falscher Request-Typ außerhalb vom Workflow.",
+                text=t("errors.invalid_request_type", locale=locale),
                 is_error=True,
                 error_code="invalid_request_type"
             )
@@ -115,7 +115,13 @@ class CommandProcessor:
             await room.load()
 
         if not is_allowed(command.name, user, room):
-            return permission_denied(session_id, command.name, user, room)
+            return permission_denied(
+                session_id,
+                command.name,
+                user,
+                room,
+                locale=locale,
+            )
 
         # 6. Execute command via its run method
         try:

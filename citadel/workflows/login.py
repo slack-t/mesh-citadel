@@ -29,7 +29,7 @@ class LoginWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text=f"1: {welcome}\n\nWer bist du? (Username):",
+                text=context.t("login.prompt_username", welcome=welcome),
                 hints={"type": "text", "workflow": self.kind, "step": 2}
             )
 
@@ -54,7 +54,7 @@ class LoginWorkflow(Workflow):
                 else:
                     return ToUser(
                         session_id=context.session_id,
-                        text="Fehler: Registrierungs-Workflow nicht gefunden",
+                        text=context.t("login.register_workflow_missing"),
                         is_error=True,
                         error_code="workflow_not_found"
                     )
@@ -72,8 +72,10 @@ class LoginWorkflow(Workflow):
                 )
                 return ToUser(
                     session_id=context.session_id,
-                    text=(f"User '{data['username']}' nicht am Start. Probier's nochmal oder "
-                          "tippe 'new' um dich zu registrieren.\nWer bist du? (Username):"),
+                    text=context.t(
+                        "login.user_not_found",
+                        username=data["username"],
+                    ),
                     hints={"type": "text", "workflow": self.kind, "step": 2},
                     is_error=True,
                     error_code="invalid_username"
@@ -88,7 +90,7 @@ class LoginWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text="2: Passwort her:",
+                text=context.t("login.prompt_password"),
                 hints={"type": "password", "workflow": self.kind, "step": 3}
             )
 
@@ -106,7 +108,7 @@ class LoginWorkflow(Workflow):
                     context.session_mgr.clear_workflow(context.session_id)
                     return ToUser(
                         session_id=context.session_id,
-                        text="Puh, du hast zu oft verkackt. Komm später wieder.",
+                        text=context.t("login.too_many_attempts"),
                         is_error=True,
                         error_code="login_blocked"
                     )
@@ -117,7 +119,7 @@ class LoginWorkflow(Workflow):
                 )
                 return ToUser(
                     session_id=context.session_id,
-                    text="Nö, das war nix. Probier's nochmal.\nWer bist du? (Username):",
+                    text=context.t("login.wrong_password"),
                     hints={"type": "text", "workflow": self.kind, "step": 2},
                     is_error=True,
                     error_code="login_failed"
@@ -128,7 +130,7 @@ class LoginWorkflow(Workflow):
             has_mail = await mail.has_unread_messages(username)
             mail_msg = ""
             if has_mail:
-                mail_msg = "\n* Du hast ungelesene Post"
+                mail_msg = context.t("login.unread_mail")
             context.session_mgr.mark_username(context.session_id, username)
             await context.session_mgr.mark_logged_in(context.session_id)
             context.session_mgr.clear_workflow(context.session_id)
@@ -150,13 +152,12 @@ class LoginWorkflow(Workflow):
             await room.load()
             return ToUser(
                 session_id=context.session_id,
-                text=(f"3: Schön dass du da bist, {username}! Du bist drin!\n"
-                      f"{mail_msg}")
+                text=context.t("login.success", username=username, mail=mail_msg)
             )
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Ungültiger Login-Schritt: {step}",
+            text=context.t("login.invalid_step", step=step),
             is_error=True,
             error_code="invalid_login_step"
         )

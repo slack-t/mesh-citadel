@@ -24,7 +24,7 @@ class EditUserWorkflow(Workflow):
             context.wf_state.step = 1
             return ToUser(
                 session_id=context.session_id,
-                text="Welchen User willst du bearbeiten?\nTippe 'cancel' zum Abbrechen",
+                text=context.t("edit_user.prompt_target"),
                 hints={"type": "text", "workflow": self.kind, "step": 1}
             )
         else:
@@ -47,7 +47,7 @@ class EditUserWorkflow(Workflow):
                 if not target:
                     return ToUser(
                         session_id=context.session_id,
-                        text="User nicht gefunden. Gib nen echten Namen ein oder tippe 'cancel'.",
+                        text=context.t("edit_user.user_not_found"),
                         is_error=True,
                         error_code="user_not_found"
                     )
@@ -71,15 +71,15 @@ class EditUserWorkflow(Workflow):
             selected = options[choice - 1]
             data["field"] = selected
 
-            if selected == "Abbrechen":
+            if selected == "cancel":
                 context.session_mgr.clear_workflow(context.session_id)
                 return ToUser(
                     session_id=context.session_id,
-                    text="Bearbeiten abgebrochen. Ciao!"
+                    text=context.t("edit_user.cancelled")
                     # TODO: have to figure out how to signal this needs a
                     # prompt added
                 )
-            elif selected == "Passwort zurücksetzen":
+            elif selected == "reset_password":
                 log.info(
                     f"{editor.username} initiated password reset for {data['target_user']}")
                 context.wf_state.kind = "reset_password"
@@ -88,18 +88,21 @@ class EditUserWorkflow(Workflow):
                 context.session_mgr.set_workflow(context.session_id, context)
                 return ToUser(
                     session_id=context.session_id,
-                    text="Passwort zurücksetzen\nAltes Passwort eingeben:",
+                    text=context.t("edit_user.reset_password_prompt"),
                     hints={"type": "text", "workflow": "reset_password", "step": 1}
                 )
-            elif selected == "Anzeigename":
+            elif selected == "display_name":
                 context.wf_state.step = 3
                 target = await db.get_user(data["target_user"])
                 return ToUser(
                     session_id=context.session_id,
-                    text=f"Aktueller Anzeigename: {target.display_name}\nNeuer Anzeigename her:",
+                    text=context.t(
+                        "edit_user.current_display_name",
+                        display_name=target.display_name,
+                    ),
                     hints={"type": "text", "workflow": self.kind, "step": 3}
                 )
-            elif selected == "Rechte-Level":
+            elif selected == "permission":
                 context.wf_state.step = 4
                 levels = []
                 # don't allow aides to assign sysop level
@@ -108,17 +111,23 @@ class EditUserWorkflow(Workflow):
                         levels.append(level)
                 return ToUser(
                     session_id=context.session_id,
-                    text="Wähle das neue Rechte-Level:\n" + "\n".join(
-                        f"{i+1}. {level.name}" for i, level in levels
+                    text=context.t(
+                        "edit_user.choose_permission",
+                        levels="\n".join(
+                            f"{i+1}. {level.name}" for i, level in levels
+                        ),
                     ),
                     hints={"type": "menu", "workflow": self.kind, "step": 4}
                 )
-            elif selected == "Status":
+            elif selected == "status":
                 context.wf_state.step = 5
                 return ToUser(
                     session_id=context.session_id,
-                    text="Wähle den neuen Status:\n" + "\n".join(
-                        f"{i+1}. {status.name}" for i, status in enumerate(UserStatus)
+                    text=context.t(
+                        "edit_user.choose_status",
+                        statuses="\n".join(
+                            f"{i+1}. {status.name}" for i, status in enumerate(UserStatus)
+                        ),
                     ),
                     hints={"type": "menu", "workflow": self.kind, "step": 5}
                 )
@@ -140,7 +149,7 @@ class EditUserWorkflow(Workflow):
             except (ValueError, IndexError):
                 return ToUser(
                     session_id=context.session_id,
-                    text="Falsche Wahl, Digger. Wähl was Gültiges aus.",
+                    text=context.t("edit_user.invalid_permission"),
                     is_error=True,
                     error_code="invalid_permission"
                 )
@@ -159,7 +168,7 @@ class EditUserWorkflow(Workflow):
             except (ValueError, IndexError):
                 return ToUser(
                     session_id=context.session_id,
-                    text="Falsche Wahl, Digger. Wähl nen gültigen Status.",
+                    text=context.t("edit_user.invalid_status"),
                     is_error=True,
                     error_code="invalid_status"
                 )
@@ -177,30 +186,23 @@ class EditUserWorkflow(Workflow):
         target = await db.get_user(data["target_user"])
 
         options = self._menu_options(editor)
-        lines = []
-        for option in options:
-            if option == "Anzeigename":
-                lines.append(f"Anzeigename: {target.display_name}")
-            elif option == "Rechte-Level":
-                lines.append(f"Rechte-Level: {target.permission.name}")
-            elif option == "Status":
-                lines.append(f"Status: {target.status.name}")
-            elif option == "Passwort zurücksetzen":
-                lines.append("Passwort zurücksetzen")
-            elif option == "Abbrechen":
-                lines.append("Abbrechen")
+        labels = [context.t(f"edit_user.option.{option}") for option in options]
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Benutzername: {target.username}\n" + "\n".join(
-                f"{i+1}. {opt}" for i, opt in enumerate(options)
+            text=context.t(
+                "edit_user.menu",
+                username=target.username,
+                options="\n".join(
+                    f"{i+1}. {opt}" for i, opt in enumerate(labels)
+                ),
             ),
             hints={"type": "menu", "workflow": self.kind, "step": 2}
         )
 
     def _menu_options(self, editor: User) -> list[str]:
-        options = ["Anzeigename", "Passwort zurücksetzen"]
+        options = ["display_name", "reset_password"]
         if editor.permission >= PermissionLevel.AIDE:
-            options.extend(["Rechte-Level", "Status"]) 
-        options.append("Abbrechen")
+            options.extend(["permission", "status"])
+        options.append("cancel")
         return options

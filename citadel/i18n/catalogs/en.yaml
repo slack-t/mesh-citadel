@@ -3,7 +3,213 @@ room:
   enter_unread: "Welcome to '{room}'. There are unread messages elsewhere."
   enter_no_unread: "Welcome to '{room}'. No rooms with unread messages."
 
+messages:
+  empty_room: "Yawn... absolutely dead in here. (No messages)"
+  no_new: "Nothing new here."
+
 notify:
   pending_validations:
     one: "There is {count} pending validation."
     other: "There are {count} pending validations."
+
+errors:
+  session_invalid: "Session expired or broken."
+  not_logged_in: "You need to log in."
+  type_mismatch: "Internal error: Transport sent {got}, but session wants {expected}."
+  bad_packet_format: "Internal error: Broken {type} format from transport."
+  unknown_workflow: "Unknown workflow: {kind}"
+  workflow_active: "Cannot run commands while another action is active. Type 'cancel' to abort."
+  invalid_request_type: "Wrong request type outside workflow."
+  permission_denied: "You do not have permission to {action} in {location}."
+  context_label: "this context"
+  generic: "Error: {error}"
+
+cmd:
+  go_next_unread:
+    short: "Next room with unread"
+    help: "Go to the next room with unread messages. Skips rooms you're already caught up with."
+  enter_message:
+    short: "Write a message"
+    help: "Write a new message in this room."
+  reverse_read:
+    short: "Read backwards"
+    help: "Read messages from newest to oldest."
+  forward_read:
+    short: "Read forwards"
+    help: "Read messages from oldest to newest."
+  read_new:
+    short: "Read new messages"
+    help: "Read only messages you haven't seen yet."
+  known_rooms:
+    short: "Known rooms"
+    help: "Lists all rooms you have access to."
+    no_rooms: "Sorry, no rooms available for you."
+    list: "Here are our rooms:\n\n{rooms}"
+  ignore_room:
+    short: "Ignore room"
+    help: "Ignore the current room or unignore it."
+  quit:
+    short: "Quit (log out)"
+    help: "Log out and bye."
+    greeting: "Come on in!\n\n"
+    goodbye: "See ya! Come back when you're logged in."
+  stop:
+    short: "Stop messages"
+    help: "Stop the message queue from spamming you."
+    cleared:
+      one: "Emergency brake pulled: {count} pending message"
+      other: "Emergency brake pulled: {count} pending messages"
+  cancel:
+    short: "Cancel action"
+    help: "Abort the current workflow and return to normal mode."
+    nothing_to_cancel: "Nothing to cancel, chill."
+    aborted: "Ice cold cancel: {kind} workflow."
+    aborted_prefix: "Ice cold cancel: {kind} workflow.\n\n"
+  scan_messages:
+    short: "Scan messages"
+    help: "Shows a summary of messages in this room."
+  change_room:
+    short: "Change room"
+    help: "Switch to another room. Enter the name or number."
+    not_found: "Room '{name}' not found."
+  help:
+    short: "Help"
+    help: "Shows the help menu with all commands."
+  mail:
+    short: "Post office"
+    help: "Goes directly to the Mail room for private messages."
+    not_found: "Room '{name}' not found."
+  who:
+    short: "Who's online?"
+    help: "Shows who's hanging around right now."
+    nobody: "All alone here. Nobody online."
+    list: "These dudes are online:\n{users}"
+  delete_message:
+    short: "Delete message"
+    help: "Delete a message by ID. Aides/Sysops can delete any message."
+    no_id: "You need to provide a message ID. Nothing happened."
+    deleted: "Message {id} binned."
+    denied: "Hands off! You can't delete message {id}."
+  block_user:
+    short: "Block/unblock user"
+    help: "Block (or unblock) another user. You won't see their messages."
+  validate_users:
+    short: "Validate users"
+    help: "Starts the workflow to validate new users."
+    no_pending: "Nobody waiting for validation."
+    workflow_unavailable: "Validation workflow not available."
+  create_room:
+    short: "Create room"
+    help: "Starts the workflow for creating a new room."
+    workflow_unavailable: "Room creation workflow not available."
+  edit_room:
+    short: "Edit room"
+    help: "Change the properties of this room."
+  edit_user:
+    short: "Edit user"
+    help: "Change the properties of a user."
+  fast_forward:
+    short: "Fast forward"
+    help: "Jump to the latest message, skipping everything else."
+  kill_room:
+    short: "Delete room"
+    help: "Permanently deletes the current room and all its messages."
+    no_room: "You're not in any room."
+    deleted: "BOOM! Room '{name}' has been completely vaporized and you've been teleported to the Lobby."
+    delete_error: "Error deleting room: {error}"
+
+help:
+  unknown_command: "Huh? What's that: {code}"
+  permission_denied: "You don't have access to {code}."
+  not_implemented: "{code} - {short}\n(Not yet implemented)"
+  category:
+    common: "Common"
+    uncommon: "Advanced"
+    unusual: "Unusual"
+    aide: "Aide"
+    sysop: "Sysop"
+
+login:
+  prompt_username: "1: {welcome}\n\nWho are you? (Username):"
+  register_workflow_missing: "Error: Registration workflow not found"
+  user_not_found: "User '{username}' not found. Try again or type 'new' to register.\nWho are you? (Username):"
+  prompt_password: "2: Password:"
+  too_many_attempts: "Too many failed attempts. Come back later."
+  wrong_password: "Nope, that was not it. Try again.\nWho are you? (Username):"
+  unread_mail: "\n* You have unread mail"
+  success: "3: Good to see you, {username}! You're in!\n{mail}"
+  invalid_step: "Invalid login step: {step}"
+
+register:
+  start: "1: Registration\n\nNickname (Username):"
+  username_reserved: "'{username}' is reserved and cannot be used.\nNickname (Username):"
+  username_ascii: "Usernames may only use normal (ASCII) characters\nNickname (Username):"
+  username_too_short: "Username must be at least 3 characters long\nNickname (Username):"
+  username_taken: "'{username}' is already taken\nNickname (Username):"
+  prompt_display_name: "{step}: What should others call you? (Display name):"
+  display_name_required: "Display name cannot be empty."
+  prompt_password: "{step}: Pick a solid password:"
+  password_too_short: "Your password must be at least 6 characters long. Get a little creative!"
+  terms_prompt: "{step}: {terms}\nAre you cool with the rules? (yes/no)"
+  terms_rejected_prefix: "If you don't like the rules, you're out.\n\n"
+  terms_rejected_final: "Registration thrown in the bin. Come back when you're braver."
+  terms_retry: "{step}: You have to accept the rules! {attempts} attempts left.\n\n{terms}\nAgreed?"
+  prompt_intro: "{step}: What's your motto?"
+  prompt_submit: "{step}: Submit registration? (yes/no)"
+  cancelled: "Registration cancelled. Fine, then."
+  first_user_success: "{step}: Hello Sysop! You're the boss and now have all permissions."
+  success: "{step}: Boom! Registered! You cannot do much yet until you've been checked."
+  invalid_step: "No idea what step {step} in workflow {workflow} is supposed to do"
+
+create_room:
+  start: "Let's make a new room.\nEnter the room name:"
+  name_ascii: "Room names may only use normal (ASCII) characters."
+  name_too_short: "Room name must be at least 3 characters long."
+  name_taken: "'{name}' already exists. Think of something else."
+  created: "Room '{name}' is ready!"
+  invalid_step: "No idea what step {step} in workflow {workflow} is supposed to do"
+
+enter_message:
+  prompt_recipient: "Who is the message for? (Username):"
+  prompt_content: "Start typing. End the message with a single '.' on a new line:"
+  recipient_not_found: "User not found. Try again."
+  aborted: "Message cancelled, nothing happened."
+  sent: "Message {id} posted in {room}."
+  invalid_step: "Invalid step {step}"
+
+validate_users:
+  start_prefix: "User validation\n\n"
+  quit: "Validation ended. Done for the day!"
+  invalid_command: "Huh? What? Use A/R/S/Q."
+  commands: "A=approve R=reject S=skip Q=quit"
+  all_done: "All users processed! High five!"
+  no_intro: "No info provided."
+  user_card: "User {index}/{total}\n{username} ({display_name})\nSubmitted: {submitted_at}\n\nInfo:\n{intro}\n\n{commands}"
+  approved_prefix: "'{username}' approved!\n\n"
+  approve_error: "Error approving '{username}': {error}"
+  rejected_prefix: "'{username}' rejected.\n\n"
+  reject_error: "Error rejecting '{username}': {error}"
+
+edit_user:
+  prompt_target: "Which user do you want to edit?\nType 'cancel' to abort"
+  user_not_found: "User not found. Enter a real name or type 'cancel'."
+  cancelled: "Edit cancelled. Bye!"
+  reset_password_prompt: "Reset password\nEnter old password:"
+  current_display_name: "Current display name: {display_name}\nNew display name:"
+  choose_permission: "Choose the new permission level:\n{levels}"
+  choose_status: "Choose the new status:\n{statuses}"
+  invalid_permission: "Wrong choice. Pick a valid one."
+  invalid_status: "Wrong choice. Pick a valid status."
+  menu: "Username: {username}\n{options}"
+  option:
+    display_name: "Display name"
+    reset_password: "Reset password"
+    permission: "Permission level"
+    status: "Status"
+    cancel: "Cancel"
+
+meshcore:
+  system_down: "System is down right now. Try again later."
+  welcome_back: "Welcome back, {username}! You were logged in automatically."
+  auth_failed: "Authentication error. Try again."
+  command_failed: "Command error. Something is broken, try again."

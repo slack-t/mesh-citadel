@@ -9,6 +9,7 @@ import asyncio
 import logging
 from typing import Callable, Awaitable
 
+from citadel.i18n import resolve_locale, t
 from citadel.transport.packets import FromUser, FromUserType, ToUser
 from citadel.auth.permissions import PermissionLevel
 from citadel.room.room import SystemRoomIDs
@@ -60,9 +61,13 @@ class MessageRouter:
                     session_id = self.session_mgr.get_session_by_node_id(
                         node_id)
                     if session_id:
+                        state = self.session_mgr.get_session_state(session_id)
                         error_msg = ToUser(
                             session_id=session_id,
-                            text="System grad down, Digger. Versuch's später nochmal."
+                            text=t(
+                                "meshcore.system_down",
+                                locale=resolve_locale(state, self.config),
+                            )
                         )
                         await self.session_mgr.send_msg(session_id, error_msg)
                         log.info(
@@ -128,7 +133,13 @@ class MessageRouter:
                 # Handle welcome back vs. regular command
                 if is_new_session:
                     # This is a reconnection after timeout - send welcome back message
-                    welcome_msg = f"Willkommen zurück, {username}! Wurdest automatisch eingeloggt."
+                    state = self.session_mgr.get_session_state(session_id)
+                    locale = resolve_locale(state, self.config)
+                    welcome_msg = t(
+                        "meshcore.welcome_back",
+                        locale=locale,
+                        username=username,
+                    )
                     welcome_msg = await self.insert_prompt(session_id, welcome_msg)
                     touser = ToUser(session_id=session_id, text=welcome_msg)
                     await self.session_mgr.send_msg(session_id, touser)
@@ -150,11 +161,15 @@ class MessageRouter:
                 return await self._start_login_workflow_func(session_id, node_id)
         except Exception as e:
             log.exception(
-                f"Authentication/workflow processing failed for {node_id}")
+            f"Authentication/workflow processing failed for {node_id}")
             try:
+                state = self.session_mgr.get_session_state(session_id)
                 error_msg = ToUser(
                     session_id=session_id,
-                    text="Auth-Fehler. Probier's nochmal, du packst das."
+                    text=t(
+                        "meshcore.auth_failed",
+                        locale=resolve_locale(state, self.config),
+                    )
                 )
                 await self.session_mgr.send_msg(session_id, error_msg)
             except:
@@ -185,9 +200,13 @@ class MessageRouter:
         except Exception as e:
             log.exception(f"Command processing/response failed for {node_id}")
             try:
+                state = self.session_mgr.get_session_state(session_id)
                 error_msg = ToUser(
                     session_id=session_id,
-                    text="Kommando-Fehler. Irgendwas ist kaputt, probier's nochmal."
+                    text=t(
+                        "meshcore.command_failed",
+                        locale=resolve_locale(state, self.config),
+                    )
                 )
                 await self.session_mgr.send_msg(session_id, error_msg)
             except:

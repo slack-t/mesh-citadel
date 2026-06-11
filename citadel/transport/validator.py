@@ -4,6 +4,7 @@ import logging
 from typing import Optional, Any
 
 from citadel.commands.base import BaseCommand
+from citadel.i18n import t
 from citadel.session.manager import SessionManager
 from citadel.transport.packets import FromUser, FromUserType, ToUser
 
@@ -32,7 +33,7 @@ class InputValidator:
                 f"Input validator: Invalid session ID {packet.session_id}")
             return ToUser(
                 session_id=packet.session_id,
-                text="Session abgelaufen oder kaputt.",
+                text=t("errors.session_invalid"),
                 is_error=True,
                 error_code="invalid_session"
             )
@@ -49,7 +50,11 @@ class InputValidator:
             )
             return ToUser(
                 session_id=packet.session_id,
-                text=f"Interner Fehler: Transport schickt {packet.payload_type}, aber Session will {expected_type}.",
+                text=t(
+                    "errors.type_mismatch",
+                    got=packet.payload_type,
+                    expected=expected_type,
+                ),
                 is_error=True,
                 error_code="transport_error"
             )
@@ -64,7 +69,7 @@ class InputValidator:
             )
             return ToUser(
                 session_id=packet.session_id,
-                text=f"Interner Fehler: Kaputtes {packet.payload_type} Format vom Transport.",
+                text=t("errors.bad_packet_format", type=packet.payload_type),
                 is_error=True,
                 error_code="transport_error"
             )

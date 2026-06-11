@@ -96,7 +96,7 @@ def test_unknown_action_denied():
 def test_permission_denied_response():
     user = DummyUser(PermissionLevel.TWIT)
     room = DummyRoom()
-    resp = permission_denied("enter_message", user, room)
+    resp = permission_denied("session-id", "enter_message", user, room, locale="en")
     assert isinstance(resp, ToUser)
     assert resp.is_error
     assert resp.error_code == "permission_denied"

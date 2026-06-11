@@ -26,7 +26,7 @@ class EnterMessageWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text="An wen geht die Nachricht? (Username):",
+                text=context.t("enter_message.prompt_recipient"),
                 hints={"type": "text", "workflow": self.kind, "step": 1}
             )
         else:
@@ -40,7 +40,7 @@ class EnterMessageWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text="Hau in die Tasten. Beende die Nachricht mit nem einzelnen '.' in ner neuen Zeile:",
+                text=context.t("enter_message.prompt_content"),
                 hints={"type": "text", "workflow": self.kind, "step": 2}
             )
 
@@ -59,7 +59,7 @@ class EnterMessageWorkflow(Workflow):
             if not recipient or not await User.username_exists(db, recipient):
                 return ToUser(
                     session_id=context.session_id,
-                    text="User nicht gefunden. Probier's nochmal.",
+                    text=context.t("enter_message.recipient_not_found"),
                     is_error=True,
                     error_code="invalid_recipient"
                 )
@@ -70,7 +70,7 @@ class EnterMessageWorkflow(Workflow):
             except RuntimeError:
                 return ToUser(
                     session_id=context.session_id,
-                    text="User nicht gefunden. Probier's nochmal.",
+                    text=context.t("enter_message.recipient_not_found"),
                     is_error=True,
                     error_code="invalid_recipient"
                 )
@@ -86,7 +86,7 @@ class EnterMessageWorkflow(Workflow):
             )
             return ToUser(
                 session_id=context.session_id,
-                text="Hau in die Tasten. Beende die Nachricht mit nem einzelnen '.' in ner neuen Zeile:",
+                text=context.t("enter_message.prompt_content"),
                 hints={"type": "text", "workflow": self.kind, "step": 2}
             )
 
@@ -107,7 +107,7 @@ class EnterMessageWorkflow(Workflow):
                         context.session_mgr.clear_workflow(context.session_id)
                         return ToUser(
                             session_id=context.session_id,
-                            text="Nachricht abgebrochen, nix passiert."
+                            text=context.t("enter_message.aborted")
                         )
                 else:
                     try:
@@ -116,13 +116,17 @@ class EnterMessageWorkflow(Workflow):
                         context.session_mgr.clear_workflow(context.session_id)
                         return ToUser(
                             session_id=context.session_id,
-                            text="Nachricht abgebrochen, nix passiert."
+                            text=context.t("enter_message.aborted")
                         )
 
                 context.session_mgr.clear_workflow(context.session_id)
                 return ToUser(
                     session_id=context.session_id,
-                    text=f"Nachricht {msg_id} in {room.name} rausgehauen."
+                    text=context.t(
+                        "enter_message.sent",
+                        id=msg_id,
+                        room=room.name,
+                    )
                 )
             else:
                 lines.append(line)
@@ -139,7 +143,7 @@ class EnterMessageWorkflow(Workflow):
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Ungültiger Schritt {step}",
+            text=context.t("enter_message.invalid_step", step=step),
             is_error=True,
             error_code="invalid_step"
         )

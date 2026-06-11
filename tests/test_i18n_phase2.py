@@ -128,3 +128,17 @@ async def test_processor_uses_session_locale_for_go_next_unread(db, config):
     assert isinstance(resp, ToUser)
     assert "Welcome to" in resp.text
     assert "Willkommen" not in resp.text
+
+
+def test_resolve_locale_empty_string_falls_through():
+    state = SessionState(locale="")
+    config = SimpleNamespace(system={"locale": "en"})
+
+    assert resolve_locale(state, config) == "en"
+
+
+def test_resolve_locale_reads_from_config():
+    config = SimpleNamespace(system={"locale": "en"})
+
+    assert resolve_locale(SessionState(), config) == "en"
+    assert resolve_locale(None, config) == "en"

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import IntEnum
 import logging
 
+from citadel.i18n import t
 from citadel.transport.packets import ToUser
 
 log = logging.getLogger(__name__)
@@ -98,15 +99,21 @@ def is_allowed(action: str, user, room=None) -> bool:
     return True
 
 
-def permission_denied(session_id, action: str, user, room=None):
+def permission_denied(session_id, action: str, user, room=None, locale: str = "de"):
     requirement = ACTION_REQUIREMENTS.get(action)
     if requirement:
         do_action = requirement.description
     else:
         do_action = action
+    location = room.name if room else t("errors.context_label", locale=locale)
     return ToUser(
         session_id=session_id,
-        text=f"You do not have permission to {do_action} in {room.name if room else 'this context'}.",
+        text=t(
+            "errors.permission_denied",
+            locale=locale,
+            action=do_action,
+            location=location,
+        ),
         is_error=True,
         error_code="permission_denied"
     )

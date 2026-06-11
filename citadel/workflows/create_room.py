@@ -25,10 +25,9 @@ class CreateRoomWorkflow(Workflow):
 
     async def start(self, context):
         """Start the room creation workflow by prompting for room name."""
-        text = "Lass mal nen neuen Raum machen.\nGib mal den Raumnamen ein:"
         return ToUser(
             session_id=context.session_id,
-            text=text,
+            text=context.t("create_room.start"),
             hints={"type": "text", "workflow": self.kind, "step": 1}
         )
 
@@ -46,14 +45,14 @@ class CreateRoomWorkflow(Workflow):
             if not is_ascii_string(room_name):
                 return ToUser(
                     session_id=context.session_id,
-                    text="Raumnamen dürfen nur normale (ASCII) Zeichen haben, Digger.",
+                    text=context.t("create_room.name_ascii"),
                     is_error=True,
                     error_code="invalid_room_name"
                 )
             if not room_name or len(room_name) < 3:
                 return ToUser(
                     session_id=context.session_id,
-                    text="Raumname muss mindestens 3 Zeichen lang sein.",
+                    text=context.t("create_room.name_too_short"),
                     is_error=True,
                     error_code="invalid_room_name"
                 )
@@ -62,7 +61,7 @@ class CreateRoomWorkflow(Workflow):
                 if room_id:
                     return ToUser(
                         session_id=context.session_id,
-                        text=f"'{room_name}' gibt's schon. Denk dir was anderes aus.",
+                        text=context.t("create_room.name_taken", name=room_name),
                         is_error=True,
                         error_code="room_name_taken"
                     )
@@ -96,12 +95,12 @@ class CreateRoomWorkflow(Workflow):
 
             return ToUser(
                 session_id=context.session_id,
-                text=f"Raum '{room_name}' am Start!"
+                text=context.t("create_room.created", name=room_name)
             )
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Kein Plan was Schritt {step} im Workflow {self.kind} soll",
+            text=context.t("create_room.invalid_step", step=step, workflow=self.kind),
             is_error=True,
             error_code="invalid_step"
         )

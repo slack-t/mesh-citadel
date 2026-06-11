@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from enum import IntEnum
 from typing import Any, Dict, Optional, TYPE_CHECKING
 from citadel.auth.permissions import PermissionLevel
+from citadel.i18n import _translator as _i18n
 
 if TYPE_CHECKING:
     from citadel.db.manager import DatabaseManager
@@ -27,12 +28,10 @@ class CommandContext:
     locale: str = "de"
 
     def t(self, key: str, **kwargs) -> str:
-        from citadel.i18n import _translator
-        return _translator.t(key, locale=self.locale, **kwargs)
+        return _i18n.t(key, locale=self.locale, **kwargs)
 
     def tn(self, key: str, count: int, **kwargs) -> str:
-        from citadel.i18n import _translator
-        return _translator.tn(key, count, locale=self.locale, **kwargs)
+        return _i18n.tn(key, count, locale=self.locale, **kwargs)
 
 
 class CommandCategory(IntEnum):

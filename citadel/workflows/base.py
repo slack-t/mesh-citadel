@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, Any
+from citadel.i18n import _translator as _i18n
 
 if TYPE_CHECKING:
     from citadel.transport.packets import ToUser
@@ -20,12 +21,10 @@ class WorkflowContext:
     locale: str = "de"
 
     def t(self, key: str, **kwargs) -> str:
-        from citadel.i18n import _translator
-        return _translator.t(key, locale=self.locale, **kwargs)
+        return _i18n.t(key, locale=self.locale, **kwargs)
 
     def tn(self, key: str, count: int, **kwargs) -> str:
-        from citadel.i18n import _translator
-        return _translator.tn(key, count, locale=self.locale, **kwargs)
+        return _i18n.tn(key, count, locale=self.locale, **kwargs)
 
 
 @dataclass

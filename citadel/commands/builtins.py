@@ -37,7 +37,7 @@ async def scan_messages(context, msg_ids):
     if not msg_ids:
         return ToUser(
             session_id=context.session_id,
-            text="Gähn... absolut tote Hose (Keine Nachrichten)"
+            text=context.t("messages.empty_room")
         )
 
     msgs = []
@@ -70,7 +70,7 @@ async def read_messages(context, msg_ids):
     if not msg_ids:
         return ToUser(
             session_id=context.session_id,
-            text="Nix Neues hier, Digger."
+            text=context.t("messages.no_new")
         )
 
     to_user_list = []
@@ -94,7 +94,7 @@ async def read_messages(context, msg_ids):
         log.debug(f"Adding message to read list: {msg['id']}")
         to_user_list.append(ToUser(
             session_id=context.session_id,
-            text="",  # Message content is in the message field
+            text=str(),  # Message content is in the message field
             message=message_response
         ))
 
@@ -110,8 +110,8 @@ class GoNextUnreadCommand(BaseCommand):
     name = "go_next_unread"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Nächster Raum mit neuen Nachrichten"
-    help_text = "Gehe zum nächsten Raum mit ungelesenen Nachrichten. Überspringt Räume, die du schon kennst."
+    short_text = "cmd.go_next_unread.short"
+    help_text = "cmd.go_next_unread.help"
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -154,8 +154,8 @@ class EnterMessageCommand(BaseCommand):
     name = "enter_message"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Nachricht schreiben"
-    help_text = "Verfass eine neue Nachricht in diesem Raum."
+    short_text = "cmd.enter_message.short"
+    help_text = "cmd.enter_message.help"
 
     def validate(self, context=None):
         super().validate(context)
@@ -169,7 +169,7 @@ class EnterMessageCommand(BaseCommand):
         if not state:
             return ToUser(
                 session_id=context.session_id,
-                text="Session nicht gefunden",
+                text=context.t("errors.session_invalid"),
                 is_error=True,
                 error_code="no_session"
             )
@@ -196,8 +196,8 @@ class ReverseReadCommand(BaseCommand):
     name = "reverse_read"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Nachrichten rückwärts lesen"
-    help_text = "Lies Nachrichten von neu nach alt."
+    short_text = "cmd.reverse_read.short"
+    help_text = "cmd.reverse_read.help"
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -216,8 +216,8 @@ class ForwardReadCommand(BaseCommand):
     name = "forward_read"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Nachrichten vorwärts lesen"
-    help_text = "Lies Nachrichten von alt nach neu."
+    short_text = "cmd.forward_read.short"
+    help_text = "cmd.forward_read.help"
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -236,8 +236,8 @@ class ReadNewMessagesCommand(BaseCommand):
     name = "read_new_messages"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Neue Nachrichten lesen"
-    help_text = "Lies nur Nachrichten, die du noch nicht gesehen hast."
+    short_text = "cmd.read_new.short"
+    help_text = "cmd.read_new.help"
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -254,8 +254,8 @@ class KnownRoomsCommand(BaseCommand):
     name = "known_rooms"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Bekannte Räume"
-    help_text = "Zeigt alle Räume, die du kennst."
+    short_text = "cmd.known_rooms.short"
+    help_text = "cmd.known_rooms.help"
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -271,7 +271,7 @@ class KnownRoomsCommand(BaseCommand):
         if not rooms:
             return ToUser(
                 session_id=context.session_id,
-                text="Sorry, für dich gibt's hier keine Räume."
+                text=context.t("cmd.known_rooms.no_rooms")
             )
 
         lines = []
@@ -292,7 +292,7 @@ class KnownRoomsCommand(BaseCommand):
         room_list = "\n".join(lines)
         return ToUser(
             session_id=context.session_id,
-            text=f"Hier sind unsere Räume:\n\n{room_list}"
+            text=context.t("cmd.known_rooms.list", rooms=room_list)
         )
 
 
@@ -302,8 +302,8 @@ class IgnoreRoomCommand(BaseCommand):
     name = "ignore_room"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Raum ignorieren"
-    help_text = "Ignoriere den aktuellen Raum oder hebe die Ignorierung auf."
+    short_text = "cmd.ignore_room.short"
+    help_text = "cmd.ignore_room.help"
 
 
 @register_command
@@ -312,8 +312,8 @@ class QuitCommand(BaseCommand):
     name = "quit"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Abhauen (Quit)"
-    help_text = "Ausloggen und tschüss."
+    short_text = "cmd.quit.short"
+    help_text = "cmd.quit.help"
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -327,13 +327,13 @@ class QuitCommand(BaseCommand):
         )
 
         if login_prompt:
-            login_prompt.text = "Hau rein!\n\n" + login_prompt.text
+            login_prompt.text = context.t("cmd.quit.greeting") + login_prompt.text
             return login_prompt
         else:
             # Fallback if login workflow unavailable
             return ToUser(
                 session_id=state.session_id,
-                text="Tschüssikowski! Komm wieder wenn du eingeloggt bist."
+                text=context.t("cmd.quit.goodbye")
             )
 
 
@@ -343,18 +343,14 @@ class StopCommand(BaseCommand):
     name = "stop"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Nachrichten stoppen"
-    help_text = "Hört auf, Nachrichten zu spammen."
+    short_text = "cmd.stop.short"
+    help_text = "cmd.stop.help"
 
     async def run(self, context):
         num = await context.session_mgr.clear_msg_queue(context.session_id)
-        if num == 1:
-            mword = "message"
-        else:
-            mword = "messages"
         return ToUser(
             session_id=context.session_id,
-            text=f"Notbremse gezogen: {num} pending {mword}"
+            text=context.tn("cmd.stop.cleared", count=num)
         )
 
 
@@ -364,8 +360,8 @@ class CancelCommand(BaseCommand):
     name = "cancel"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Aktion abbrechen"
-    help_text = "Bricht den aktuellen Workflow ab und geht zurück in den Normalmodus."
+    short_text = "cmd.cancel.short"
+    help_text = "cmd.cancel.help"
 
     async def run(self, context):
         from citadel.workflows import registry as workflow_registry
@@ -375,7 +371,7 @@ class CancelCommand(BaseCommand):
         if not workflow_state:
             return ToUser(
                 session_id=context.session_id,
-                text="Gibt nix abzubrechen, chill.",
+                text=context.t("cmd.cancel.nothing_to_cancel"),
                 is_error=True,
                 error_code="no_workflow"
             )
@@ -400,13 +396,15 @@ class CancelCommand(BaseCommand):
                 context.config, context.db, context.session_id
             )
             if login_prompt:
-                login_prompt.text = f"Eiskalt abgebrochen: {workflow_state.kind} workflow.\n\n" + \
-                    login_prompt.text
+                login_prompt.text = context.t(
+                    "cmd.cancel.aborted_prefix",
+                    kind=workflow_state.kind,
+                ) + login_prompt.text
                 return login_prompt
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Eiskalt abgebrochen: {workflow_state.kind} workflow."
+            text=context.t("cmd.cancel.aborted", kind=workflow_state.kind)
         )
 
 
@@ -416,8 +414,8 @@ class ScanMessagesCommand(BaseCommand):
     name = "scan_messages"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
-    short_text = "Nachrichten überfliegen"
-    help_text = "Zeigt eine Zusammenfassung der Nachrichten in diesem Raum."
+    short_text = "cmd.scan_messages.short"
+    help_text = "cmd.scan_messages.help"
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -435,8 +433,8 @@ class ChangeRoomCommand(BaseCommand):
     name = "change_room"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
-    short_text = "Raum wechseln"
-    help_text = "Wechsle in einen anderen Raum. Gib den Namen oder die Nummer nach dem Kommando ein."
+    short_text = "cmd.change_room.short"
+    help_text = "cmd.change_room.help"
     # add an args attribute for any command that takes an argument
     args = ""
 
@@ -453,7 +451,7 @@ class ChangeRoomCommand(BaseCommand):
         except RoomNotFoundError:
             return ToUser(
                 session_id=context.session_id,
-                text=f"Raum {self.args} nicht gefunden.",
+                text=context.t("cmd.change_room.not_found", name=self.args),
                 is_error=True,
                 error_code="no_next_room"
             )
@@ -461,7 +459,7 @@ class ChangeRoomCommand(BaseCommand):
             context.session_id, next_room.room_id)
         return ToUser(
             session_id=context.session_id,
-            text=f"Willkommen im Raum '{next_room.name}'."
+            text=context.t("room.enter", room=next_room.name)
         )
 
 
@@ -471,8 +469,8 @@ class HelpCommand(BaseCommand):
     name = "help"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Hilfe"
-    help_text = "Zeigt das Hilfemenü mit allen Kommandos."
+    short_text = "cmd.help.short"
+    help_text = "cmd.help.help"
 
     async def run(self, context):
         from citadel.commands.registry import registry
@@ -489,24 +487,25 @@ class HelpCommand(BaseCommand):
 
         # If specific command requested, show detailed help
         if "command" in self.args and self.args["command"]:
-            return await self._show_command_help(context.session_id, self.args["command"], user, room)
+            return await self._show_command_help(context, self.args["command"], user, room)
 
         # Build dynamic menu by category
         all_commands = registry.available()
         menus = []
         for category in CommandCategory:
             text = self._build_category_menu(
-                all_commands, user, room, category)
-            if 'No available' in text:
+                context, all_commands, user, room, category)
+            if not text:
                 continue
             menus.append(text)
 
+        menu_text = "\n\n".join(menus)
         return ToUser(
             session_id=context.session_id,
-            text="\n\n".join(menus)
+            text=menu_text
         )
 
-    def _build_category_menu(self, all_commands, user, room, category):
+    def _build_category_menu(self, context, all_commands, user, room, category):
         """Build menu for a specific category."""
         # Filter to implemented commands user can access in this category
         available_commands = []
@@ -522,55 +521,54 @@ class HelpCommand(BaseCommand):
         # Build compact menu text
         menu_lines = []
         for cmd in available_commands:
-            menu_lines.append(f"{cmd.code}-{cmd.short_text}")
+            menu_lines.append(f"{cmd.code}-{context.t(cmd.short_text)}")
 
         if not menu_lines:
-            return "Keine verfügbaren Kommandos in dieser Kategorie."
+            return ""
 
         # Add category header and join lines
-        category_map = {
-            "Common": "Standard",
-            "Uncommon": "Fortgeschritten",
-            "Unusual": "Selten",
-            "Aide": "Aide",
-            "Sysop": "Sysop"
-        }
-        category_name = category_map.get(category.name.title(), category.name.title())
+        category_name = context.t(f"help.category.{category.name.lower()}")
         header = f"{category_name} Kommandos:"
         return header + "\n" + "  ".join(menu_lines)
 
-    async def _show_command_help(self, session_id, command_code, user, room):
+    async def _show_command_help(self, context, command_code, user, room):
         """Show detailed help for a specific command."""
         from citadel.commands.registry import registry
 
         cmd_class = registry.get(command_code.upper())
         if not cmd_class:
             return ToUser(
-                session_id=session_id,
-                text=f"Hä? Was soll das sein: {command_code}",
+                session_id=context.session_id,
+                text=context.t("help.unknown_command", code=command_code),
                 is_error=True,
                 error_code="unknown_command"
             )
 
         if not is_allowed(cmd_class.name, user, room):
             return ToUser(
-                session_id=session_id,
-                text=f"Digger, du hast keine Rechte für {command_code}",
+                session_id=context.session_id,
+                text=context.t("help.permission_denied", code=command_code),
                 is_error=True,
                 error_code="permission_denied"
             )
 
         if not cmd_class.is_implemented():
             return ToUser(
-                session_id=session_id,
-                text=f"{cmd_class.code} - {cmd_class.short_text}\n(Noch nicht eingebaut)"
+                session_id=context.session_id,
+                text=context.t(
+                    "help.not_implemented",
+                    code=cmd_class.code,
+                    short=context.t(cmd_class.short_text),
+                )
             )
 
         # Build detailed help text
-        help_text = f"{cmd_class.code} - {cmd_class.short_text}\n{cmd_class.help_text}"
+        short = context.t(cmd_class.short_text)
+        help_body = context.t(cmd_class.help_text)
+        help_text = f"{cmd_class.code} - {short}\n{help_body}"
 
         return ToUser(
-            session_id=session_id,
+            session_id=context.session_id,
             text=help_text
         )
 
@@ -582,8 +580,8 @@ class MenuCommand(BaseCommand):
     name = "help"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Hilfe"
-    help_text = "Zeigt das Hilfemenü mit allen Kommandos."
+    short_text = "cmd.help.short"
+    help_text = "cmd.help.help"
 
     # Use the same implementation as HelpCommand
     run = HelpCommand.run
@@ -597,8 +595,8 @@ class MailCommand(BaseCommand):
     name = "mail"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
-    short_text = "Postamt"
-    help_text = "Geht direkt in den Mail-Raum für private Nachrichten."
+    short_text = "cmd.mail.short"
+    help_text = "cmd.mail.help"
 
     async def run(self, context):
 
@@ -612,7 +610,7 @@ class MailCommand(BaseCommand):
         except RoomNotFoundError:
             return ToUser(
                 session_id=context.session_id,
-                text=f"Raum {self.args} nicht gefunden.",
+                text=context.t("cmd.mail.not_found", name=self.args),
                 is_error=True,
                 error_code="no_next_room"
             )
@@ -620,7 +618,7 @@ class MailCommand(BaseCommand):
             context.session_id, mail_room.room_id)
         return ToUser(
             session_id=context.session_id,
-            text=f"Willkommen im Raum '{mail_room.name}'."
+            text=context.t("room.enter", room=mail_room.name)
         )
 
 
@@ -630,8 +628,8 @@ class WhoCommand(BaseCommand):
     name = "who"
     category = CommandCategory.UNCOMMON
     permission_level = PermissionLevel.USER
-    short_text = "Wer ist online?"
-    help_text = "Zeigt wer gerade alles rumhängt."
+    short_text = "cmd.who.short"
+    help_text = "cmd.who.help"
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
@@ -694,7 +692,7 @@ class WhoCommand(BaseCommand):
         if not online_users:
             return ToUser(
                 session_id=context.session_id,
-                text="Alleine hier. Keiner online."
+                text=context.t("cmd.who.nobody")
             )
 
         # Sort alphabetically
@@ -703,7 +701,7 @@ class WhoCommand(BaseCommand):
 
         return ToUser(
             session_id=context.session_id,
-            text=f"Diese Dudes sind online:\n{user_list}"
+            text=context.t("cmd.who.list", users=user_list)
         )
 
 
@@ -713,8 +711,8 @@ class DeleteMessageCommand(BaseCommand):
     name = "delete_message"
     category = CommandCategory.COMMON
     permission_level = PermissionLevel.USER
-    short_text = "Nachricht löschen"
-    help_text = "Löscht eine Nachricht mit bestimmter ID. Nur Aides und Sysops dürfen fremde Nachrichten löschen."
+    short_text = "cmd.delete_message.short"
+    help_text = "cmd.delete_message.help"
     args = ""
 
     async def run(self, context):
@@ -728,7 +726,7 @@ class DeleteMessageCommand(BaseCommand):
         if not self.args:
             return ToUser(
                 session_id=context.session_id,
-                text='Du musst schon ne Message-ID angeben. Nix passiert.',
+                text=context.t("cmd.delete_message.no_id"),
                 is_error=True
             )
         msg = await context.msg_mgr.get_message(self.args, user)
@@ -749,14 +747,14 @@ class DeleteMessageCommand(BaseCommand):
                 f'Message {msg["id"]} deleted from room {room.name} by {user.username} (allowed because {reason})')
             return ToUser(
                 session_id=context.session_id,
-                text=f"Nachricht {msg['id']} in die Tonne gekloppt."
+                text=context.t("cmd.delete_message.deleted", id=msg["id"])
             )
         else:
             log.info(
                 f'User {user.username} tried to delete message {msg["id"]} in room {room.name}, but was denied (no permission)')
             return ToUser(
                 session_id=context.session_id,
-                text=f"Finger weg! Du darfst Nachricht {msg['id']} nicht löschen.",
+                text=context.t("cmd.delete_message.denied", id=msg["id"]),
                 is_error=True
             )
 
@@ -767,8 +765,8 @@ class BlockUserCommand(BaseCommand):
     name = "block_user"
     category = CommandCategory.UNUSUAL
     permission_level = PermissionLevel.USER
-    short_text = "User (ent)sperren"
-    help_text = "Sperrt (oder entsperrt) einen anderen User. Du siehst dann keine Nachrichten mehr von dem."
+    short_text = "cmd.block_user.short"
+    help_text = "cmd.block_user.help"
 
 
 @register_command
@@ -777,8 +775,8 @@ class ValidateUsersCommand(BaseCommand):
     name = "validate_users"
     category = CommandCategory.AIDE
     permission_level = PermissionLevel.AIDE
-    short_text = "User freigeben"
-    help_text = "Startet den Workflow um neue User zu validieren."
+    short_text = "cmd.validate_users.short"
+    help_text = "cmd.validate_users.help"
 
     async def run(self, context):
         # Check if there are any pending validations
@@ -789,7 +787,7 @@ class ValidateUsersCommand(BaseCommand):
         if not pending_users:
             return ToUser(
                 session_id=context.session_id,
-                text="Niemand da, der auf Freigabe wartet."
+                text=context.t("cmd.validate_users.no_pending")
             )
 
         # Start validation workflow
@@ -818,7 +816,7 @@ class ValidateUsersCommand(BaseCommand):
 
         return ToUser(
             session_id=context.session_id,
-            text="Validierungs-Workflow nicht am Start.",
+            text=context.t("cmd.validate_users.workflow_unavailable"),
             is_error=True,
             error_code="workflow_unavailable"
         )
@@ -834,8 +832,8 @@ class CreateRoomCommand(BaseCommand):
     name = "create_room"
     category = CommandCategory.UNUSUAL
     permission_level = PermissionLevel.USER
-    short_text = "Raum erstellen"
-    help_text = "Startet den Workflow für nen neuen Raum."
+    short_text = "cmd.create_room.short"
+    help_text = "cmd.create_room.help"
 
     async def run(self, context):
         # Start validation workflow
@@ -863,7 +861,7 @@ class CreateRoomCommand(BaseCommand):
 
         return ToUser(
             session_id=context.session_id,
-            text="Raum-Erstellungs-Workflow nicht am Start.",
+            text=context.t("cmd.create_room.workflow_unavailable"),
             is_error=True,
             error_code="workflow_unavailable"
         )
@@ -875,8 +873,8 @@ class EditRoomCommand(BaseCommand):
     name = "edit_room"
     category = CommandCategory.SYSOP
     permission_level = PermissionLevel.SYSOP
-    short_text = "Raum bearbeiten"
-    help_text = "Ändert die Eigenschaften von diesem Raum."
+    short_text = "cmd.edit_room.short"
+    help_text = "cmd.edit_room.help"
 
 
 @register_command
@@ -885,8 +883,8 @@ class EditUserCommand(BaseCommand):
     name = "edit_user"
     category = CommandCategory.SYSOP
     permission_level = PermissionLevel.SYSOP
-    short_text = "User bearbeiten"
-    help_text = "Ändert die Eigenschaften von nem User."
+    short_text = "cmd.edit_user.short"
+    help_text = "cmd.edit_user.help"
 
 
 @register_command
@@ -895,21 +893,25 @@ class FastForwardCommand(BaseCommand):
     name = "fast_forward"
     category = CommandCategory.UNUSUAL
     permission_level = PermissionLevel.USER
-    short_text = "Vorspulen"
-    help_text = "Spult direkt zur neuesten Nachricht in diesem Raum vor und überspringt den ganzen Rest."
+    short_text = "cmd.fast_forward.short"
+    help_text = "cmd.fast_forward.help"
 @register_command
 class KillRoomCommand(BaseCommand):
     code = ".KR"
     name = "kill_room"
     category = CommandCategory.SYSOP
     permission_level = PermissionLevel.SYSOP
-    short_text = "Raum löschen"
-    help_text = "Löscht den aktuellen Raum samt allen Nachrichten endgültig. (Nur für Sysops, Systemräume können nicht gelöscht werden)."
+    short_text = "cmd.kill_room.short"
+    help_text = "cmd.kill_room.help"
 
     async def run(self, context):
         state = context.session_mgr.get_session_state(context.session_id)
         if not state or not state.current_room:
-            return ToUser(session_id=context.session_id, text="Du bist in gar keinem Raum, Digger.", is_error=True)
+            return ToUser(
+                session_id=context.session_id,
+                text=context.t("cmd.kill_room.no_room"),
+                is_error=True,
+            )
             
         from citadel.room.room import Room, SystemRoomIDs
         try:
@@ -922,9 +924,17 @@ class KillRoomCommand(BaseCommand):
             await room.delete_room(state.username)
             return ToUser(
                 session_id=context.session_id,
-                text=f"BÄM! Raum '{room_name}' wurde komplett vaporisiert und du wurdest in die Lobby teleportiert."
+                text=context.t("cmd.kill_room.deleted", name=room_name)
             )
         except ValueError as e:
-            return ToUser(session_id=context.session_id, text=f"Fehler: {str(e)}", is_error=True)
+            return ToUser(
+                session_id=context.session_id,
+                text=context.t("errors.generic", error=str(e)),
+                is_error=True,
+            )
         except Exception as e:
-            return ToUser(session_id=context.session_id, text=f"Fehler beim Löschen: {str(e)}", is_error=True)
+            return ToUser(
+                session_id=context.session_id,
+                text=context.t("cmd.kill_room.delete_error", error=str(e)),
+                is_error=True,
+            )

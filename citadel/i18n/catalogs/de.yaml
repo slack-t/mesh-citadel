@@ -3,7 +3,213 @@ room:
   enter_unread: "Willkommen im Raum '{room}'. In anderen Räumen gibt's noch was zu lesen."
   enter_no_unread: "Willkommen im Raum '{room}'. Nix mehr ungelesen, alles durch."
 
+messages:
+  empty_room: "Gähn... absolut tote Hose (Keine Nachrichten)"
+  no_new: "Nix Neues hier, Digger."
+
 notify:
   pending_validations:
     one: "{count} User wartet auf Freigabe."
     other: "{count} User warten auf Freigabe."
+
+errors:
+  session_invalid: "Session abgelaufen oder kaputt."
+  not_logged_in: "Du musst dich einloggen, Digger."
+  type_mismatch: "Interner Fehler: Transport schickt {got}, aber Session will {expected}."
+  bad_packet_format: "Interner Fehler: Kaputtes {type} Format vom Transport."
+  unknown_workflow: "Kein Plan von diesem Workflow: {kind}"
+  workflow_active: "Kann keine Befehle ausführen, während du was anderes machst. Tippe 'cancel' zum Abbrechen."
+  invalid_request_type: "Falscher Request-Typ außerhalb vom Workflow."
+  permission_denied: "Du hast keine Rechte, um {action} in {location} zu machen."
+  context_label: "diesem Bereich"
+  generic: "Fehler: {error}"
+
+cmd:
+  go_next_unread:
+    short: "Nächster Raum mit neuen Nachrichten"
+    help: "Gehe zum nächsten Raum mit ungelesenen Nachrichten. Überspringt Räume, die du schon kennst."
+  enter_message:
+    short: "Nachricht schreiben"
+    help: "Verfass eine neue Nachricht in diesem Raum."
+  reverse_read:
+    short: "Nachrichten rückwärts lesen"
+    help: "Lies Nachrichten von neu nach alt."
+  forward_read:
+    short: "Nachrichten vorwärts lesen"
+    help: "Lies Nachrichten von alt nach neu."
+  read_new:
+    short: "Neue Nachrichten lesen"
+    help: "Lies nur Nachrichten, die du noch nicht gesehen hast."
+  known_rooms:
+    short: "Bekannte Räume"
+    help: "Zeigt alle Räume, die du kennst."
+    no_rooms: "Sorry, für dich gibt's hier keine Räume."
+    list: "Hier sind unsere Räume:\n\n{rooms}"
+  ignore_room:
+    short: "Raum ignorieren"
+    help: "Ignoriere den aktuellen Raum oder hebe die Ignorierung auf."
+  quit:
+    short: "Abhauen (Quit)"
+    help: "Ausloggen und tschüss."
+    greeting: "Hau rein!\n\n"
+    goodbye: "Tschüssikowski! Komm wieder wenn du eingeloggt bist."
+  stop:
+    short: "Nachrichten stoppen"
+    help: "Hört auf, Nachrichten zu spammen."
+    cleared:
+      one: "Notbremse gezogen: {count} pending Nachricht"
+      other: "Notbremse gezogen: {count} pending Nachrichten"
+  cancel:
+    short: "Aktion abbrechen"
+    help: "Bricht den aktuellen Workflow ab und geht zurück in den Normalmodus."
+    nothing_to_cancel: "Gibt nix abzubrechen, chill."
+    aborted: "Eiskalt abgebrochen: {kind} workflow."
+    aborted_prefix: "Eiskalt abgebrochen: {kind} workflow.\n\n"
+  scan_messages:
+    short: "Nachrichten überfliegen"
+    help: "Zeigt eine Zusammenfassung der Nachrichten in diesem Raum."
+  change_room:
+    short: "Raum wechseln"
+    help: "Wechsle in einen anderen Raum. Gib den Namen oder die Nummer nach dem Kommando ein."
+    not_found: "Raum {name} nicht gefunden."
+  help:
+    short: "Hilfe"
+    help: "Zeigt das Hilfemenü mit allen Kommandos."
+  mail:
+    short: "Postamt"
+    help: "Geht direkt in den Mail-Raum für private Nachrichten."
+    not_found: "Raum {name} nicht gefunden."
+  who:
+    short: "Wer ist online?"
+    help: "Zeigt wer gerade alles rumhängt."
+    nobody: "Alleine hier. Keiner online."
+    list: "Diese Dudes sind online:\n{users}"
+  delete_message:
+    short: "Nachricht löschen"
+    help: "Löscht eine Nachricht mit bestimmter ID. Nur Aides und Sysops dürfen fremde Nachrichten löschen."
+    no_id: "Du musst schon ne Message-ID angeben. Nix passiert."
+    deleted: "Nachricht {id} in die Tonne gekloppt."
+    denied: "Finger weg! Du darfst Nachricht {id} nicht löschen."
+  block_user:
+    short: "User (ent)sperren"
+    help: "Sperrt (oder entsperrt) einen anderen User. Du siehst dann keine Nachrichten mehr von dem."
+  validate_users:
+    short: "User freigeben"
+    help: "Startet den Workflow um neue User zu validieren."
+    no_pending: "Niemand da, der auf Freigabe wartet."
+    workflow_unavailable: "Validierungs-Workflow nicht am Start."
+  create_room:
+    short: "Raum erstellen"
+    help: "Startet den Workflow für nen neuen Raum."
+    workflow_unavailable: "Raum-Erstellungs-Workflow nicht am Start."
+  edit_room:
+    short: "Raum bearbeiten"
+    help: "Ändert die Eigenschaften von diesem Raum."
+  edit_user:
+    short: "User bearbeiten"
+    help: "Ändert die Eigenschaften von nem User."
+  fast_forward:
+    short: "Vorspulen"
+    help: "Spult direkt zur neuesten Nachricht in diesem Raum vor und überspringt den ganzen Rest."
+  kill_room:
+    short: "Raum löschen"
+    help: "Löscht den aktuellen Raum samt allen Nachrichten endgültig. (Nur für Sysops, Systemräume können nicht gelöscht werden)."
+    no_room: "Du bist in gar keinem Raum, Digger."
+    deleted: "BÄM! Raum '{name}' wurde komplett vaporisiert und du wurdest in die Lobby teleportiert."
+    delete_error: "Fehler beim Löschen: {error}"
+
+help:
+  unknown_command: "Hä? Was soll das sein: {code}"
+  permission_denied: "Digger, du hast keine Rechte für {code}"
+  not_implemented: "{code} - {short}\n(Noch nicht eingebaut)"
+  category:
+    common: "Standard"
+    uncommon: "Fortgeschritten"
+    unusual: "Selten"
+    aide: "Aide"
+    sysop: "Sysop"
+
+login:
+  prompt_username: "1: {welcome}\n\nWer bist du? (Username):"
+  register_workflow_missing: "Fehler: Registrierungs-Workflow nicht gefunden"
+  user_not_found: "User '{username}' nicht am Start. Probier's nochmal oder tippe 'new' um dich zu registrieren.\nWer bist du? (Username):"
+  prompt_password: "2: Passwort her:"
+  too_many_attempts: "Puh, du hast zu oft verkackt. Komm später wieder."
+  wrong_password: "Nö, das war nix. Probier's nochmal.\nWer bist du? (Username):"
+  unread_mail: "\n* Du hast ungelesene Post"
+  success: "3: Schön dass du da bist, {username}! Du bist drin!\n{mail}"
+  invalid_step: "Ungültiger Login-Schritt: {step}"
+
+register:
+  start: "1: Registrierung\n\nSpitzname (Username):"
+  username_reserved: "'{username}' ist reserviert und darf nicht benutzt werden.\nSpitzname (Username):"
+  username_ascii: "Benutzernamen dürfen nur aus normalen (ASCII) Zeichen bestehen\nSpitzname (Username):"
+  username_too_short: "Benutzername muss mindestens 3 Zeichen lang sein\nSpitzname (Username):"
+  username_taken: "'{username}' ist leider schon vergeben\nSpitzname (Username):"
+  prompt_display_name: "{step}: Wie sollen dich andere nennen? (Anzeigename):"
+  display_name_required: "Anzeigename darf nicht leer sein, Digger."
+  prompt_password: "{step}: Such dir ein knackiges Passwort aus:"
+  password_too_short: "Dein Passwort muss mindestens 6 Zeichen lang sein. Sei mal n bisschen kreativ!"
+  terms_prompt: "{step}: {terms}\nBist du cool mit den Regeln? (ja/nein)"
+  terms_rejected_prefix: "Wer die Regeln nicht mag, fliegt raus.\n\n"
+  terms_rejected_final: "Registrierung in die Tonne gekloppt. Komm wieder, wenn du mutiger bist."
+  terms_retry: "{step}: Du musst den Regeln zustimmen! {attempts} Versuche übrig.\n\n{terms}\nEinverstanden?"
+  prompt_intro: "{step}: Was ist dein Motto?"
+  prompt_submit: "{step}: Registrierung abschicken? (ja/nein)"
+  cancelled: "Registrierung abgebrochen. Na gut, dann halt nicht."
+  first_user_success: "{step}: Moin Sysop! Du bist der Boss und hast jetzt alle Rechte."
+  success: "{step}: Boom! Registriert! Du darfst aber noch nicht viel machen, bis du gecheckt wurdest."
+  invalid_step: "Kein Plan was Schritt {step} im Workflow {workflow} soll"
+
+create_room:
+  start: "Lass mal nen neuen Raum machen.\nGib mal den Raumnamen ein:"
+  name_ascii: "Raumnamen dürfen nur normale (ASCII) Zeichen haben, Digger."
+  name_too_short: "Raumname muss mindestens 3 Zeichen lang sein."
+  name_taken: "'{name}' gibt's schon. Denk dir was anderes aus."
+  created: "Raum '{name}' am Start!"
+  invalid_step: "Kein Plan was Schritt {step} im Workflow {workflow} soll"
+
+enter_message:
+  prompt_recipient: "An wen geht die Nachricht? (Username):"
+  prompt_content: "Hau in die Tasten. Beende die Nachricht mit nem einzelnen '.' in ner neuen Zeile:"
+  recipient_not_found: "User nicht gefunden. Probier's nochmal."
+  aborted: "Nachricht abgebrochen, nix passiert."
+  sent: "Nachricht {id} in {room} rausgehauen."
+  invalid_step: "Ungültiger Schritt {step}"
+
+validate_users:
+  start_prefix: "User Validierung\n\n"
+  quit: "Validierung beendet. Feierabend!"
+  invalid_command: "Hä? Was? Benutze A/R/S/Q."
+  commands: "A=freigeben R=ablehnen S=überspringen Q=abhauen"
+  all_done: "Alle User abgearbeitet! High Five!"
+  no_intro: "Keine Infos angegeben."
+  user_card: "User {index}/{total}\n{username} ({display_name})\nEingereicht: {submitted_at}\n\nInfos:\n{intro}\n\n{commands}"
+  approved_prefix: "'{username}' freigegeben!\n\n"
+  approve_error: "Fehler beim Freigeben von '{username}': {error}"
+  rejected_prefix: "'{username}' abgelehnt.\n\n"
+  reject_error: "Fehler beim Ablehnen von '{username}': {error}"
+
+edit_user:
+  prompt_target: "Welchen User willst du bearbeiten?\nTippe 'cancel' zum Abbrechen"
+  user_not_found: "User nicht gefunden. Gib nen echten Namen ein oder tippe 'cancel'."
+  cancelled: "Bearbeiten abgebrochen. Ciao!"
+  reset_password_prompt: "Passwort zurücksetzen\nAltes Passwort eingeben:"
+  current_display_name: "Aktueller Anzeigename: {display_name}\nNeuer Anzeigename her:"
+  choose_permission: "Wähle das neue Rechte-Level:\n{levels}"
+  choose_status: "Wähle den neuen Status:\n{statuses}"
+  invalid_permission: "Falsche Wahl, Digger. Wähl was Gültiges aus."
+  invalid_status: "Falsche Wahl, Digger. Wähl nen gültigen Status."
+  menu: "Benutzername: {username}\n{options}"
+  option:
+    display_name: "Anzeigename"
+    reset_password: "Passwort zurücksetzen"
+    permission: "Rechte-Level"
+    status: "Status"
+    cancel: "Abbrechen"
+
+meshcore:
+  system_down: "System grad down, Digger. Versuch's später nochmal."
+  welcome_back: "Willkommen zurück, {username}! Wurdest automatisch eingeloggt."
+  auth_failed: "Auth-Fehler. Probier's nochmal, du packst das."
+  command_failed: "Kommando-Fehler. Irgendwas ist kaputt, probier's nochmal."
